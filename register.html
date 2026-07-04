@@ -21,7 +21,7 @@
                 document.querySelectorAll("a").forEach(function(link) {
                     var href = link.getAttribute("href");
                     if (href && !href.startsWith("http://") && !href.startsWith("https://") && !href.startsWith("#") && !href.startsWith("javascript:")) {
-                        if (href.indexOf(".php") !== -1 || href === "login.html" || href === "register.html") {
+                        if (href.indexOf(".php") !== -1 || href === "signin.html" || href === "register.html") {
                             var target = href;
                             if (href.startsWith("../")) {
                                 target = href.substring(3);
@@ -85,7 +85,7 @@
                         registerForm.reset();
                         // Redirect to login after 2 seconds
                         setTimeout(() => {
-                            window.location.href = 'login.html';
+                            window.location.href = 'signin.html';
                         }, 2000);
                     }
                 });
@@ -441,7 +441,7 @@
 
             <!-- Bottom Link -->
             <div class="bottom-links">
-                Already have an account? <a href="login.html">Sign in</a>
+                Already have an account? <a href="signin.html">Sign in</a>
             </div>
         </div>
     </div>

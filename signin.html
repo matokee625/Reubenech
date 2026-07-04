@@ -26,7 +26,7 @@
                 document.querySelectorAll("a").forEach(function (link) {
                     var href = link.getAttribute("href");
                     if (href && !href.startsWith("http://") && !href.startsWith("https://") && !href.startsWith("#") && !href.startsWith("javascript:")) {
-                        if (href.indexOf(".php") !== -1 || href === "login.html") {
+                        if (href.indexOf(".php") !== -1 || href === "signin.html") {
                             var target = href;
                             if (href.startsWith("../")) {
                                 target = href.substring(3);
