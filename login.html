@@ -10,20 +10,19 @@
     <title>LOGIN TO REUBENTECH MILK SOLUTIONS</title>
     <link rel="icon" href="favicon.php" type="image/x-icon">
     <link rel="stylesheet" href="css/login.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
+        const supabaseUrl = 'https://hcnnimmosapaiwvthvta.supabase.co';
+        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhjbm5pbW1vc2FwYWl3dnRodnRhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwNzcxMDAsImV4cCI6MjA5ODY1MzEwMH0.BFVr1JKiQPxoOcEJryFItBJ89WxbeCmtCWBAKwv8cjg';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+
         // Handle local file protocol (file://) redirection to prevent downloads
         document.addEventListener("DOMContentLoaded", function () {
             var isFile = window.location.protocol === 'file:';
             var isLiveServer = window.location.port !== '' && window.location.port !== '80' && window.location.port !== '443';
 
             if (isFile || isLiveServer) {
-                // 1. Rewrite Form Action to target the secure local server
-                var form = document.querySelector("form");
-                if (form) {
-                    form.action = "http://localhost/milkproject/login.php";
-                }
-
-                // 2. Rewrite Links to open through Apache local server
+                // Rewrite Links to open through Apache local server
                 document.querySelectorAll("a").forEach(function (link) {
                     var href = link.getAttribute("href");
                     if (href && !href.startsWith("http://") && !href.startsWith("https://") && !href.startsWith("#") && !href.startsWith("javascript:")) {
@@ -37,15 +36,55 @@
                     }
                 });
             }
+
+            const loginForm = document.getElementById('login-form');
+            if (loginForm) {
+                loginForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    const email = document.getElementById('email').value;
+                    const password = document.getElementById('password').value;
+                    const errorBox = document.getElementById('error-box');
+                    const successBox = document.getElementById('success-box');
+                    
+                    if (errorBox) errorBox.style.display = 'none';
+                    if (successBox) successBox.style.display = 'none';
+                    
+                    const submitBtn = loginForm.querySelector('button[type="submit"]');
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'LOGGING IN...';
+                    
+                    const { data, error } = await supabase.auth.signInWithPassword({
+                        email: email,
+                        password: password,
+                    });
+                    
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'LOGIN';
+                    
+                    if (error) {
+                        if (errorBox) {
+                            errorBox.textContent = error.message;
+                            errorBox.style.display = 'block';
+                        } else {
+                            alert(error.message);
+                        }
+                    } else {
+                        if (successBox) {
+                            successBox.textContent = 'Login successful! Redirecting...';
+                            successBox.style.display = 'block';
+                        } else {
+                            alert('Login successful! Redirecting...');
+                        }
+                        setTimeout(() => {
+                            window.location.href = 'index.html';
+                        }, 1000);
+                    }
+                });
+            }
         });
     </script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-  const supabaseUrl = 'https://hcnnimmosapaiwvthvta.supabase.co';
-  const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhjbm5pbW1vc2FwYWl3dnRodnRhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwNzcxMDAsImV4cCI6MjA5ODY1MzEwMH0.BFVr1JKiQPxoOcEJryFItBJ89WxbeCmtCWBAKwv8cjg';
-  const supabase = supabase.createClient(supabaseUrl, supabaseAnonKey);
-</script>
-</head
+</head>
 
 <body>
 
@@ -68,8 +107,12 @@
                 </svg>
             </div>
 
+            <!-- Notifications -->
+            <div id="error-box" style="display:none; width: 100%; background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.4); color: #fca5a5; padding: 0.75rem 1rem; border-radius: 6px; margin-bottom: 1.25rem; font-size: 0.875rem; text-align: center;"></div>
+            <div id="success-box" style="display:none; width: 100%; background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); color: #a7f3d0; padding: 0.75rem 1rem; border-radius: 6px; margin-bottom: 1.25rem; font-size: 0.875rem; text-align: center;"></div>
+
             <!-- Login Form -->
-            <form method="POST" action="login.php" style="width: 100%;">
+            <form id="login-form" style="width: 100%;">
                 <!-- Username Input (accepts username or email on backend) -->
                 <div class="input-container">
                     <span class="input-icon">
