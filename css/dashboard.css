@@ -1,0 +1,171 @@
+/* Base & Variables */
+:root {
+  /* Brand Colors - Blue Theme for Milk/Agri */
+  --brand-hue: 200;
+  --brand: hsl(var(--brand-hue), 85%, 50%);
+  --brand-light: hsl(var(--brand-hue), 85%, 90%);
+  --brand-dark: hsl(var(--brand-hue), 85%, 40%);
+  --brand-alpha: hsla(var(--brand-hue), 85%, 50%, 0.15);
+
+  /* Status Colors */
+  --success: hsl(150, 70%, 45%);
+  --success-bg: hsla(150, 70%, 45%, 0.15);
+  --warning: hsl(40, 90%, 55%);
+  --warning-bg: hsla(40, 90%, 55%, 0.15);
+  --danger: hsl(350, 80%, 60%);
+  --danger-bg: hsla(350, 80%, 60%, 0.15);
+  --info: hsl(200, 90%, 55%);
+  
+  /* Light Theme Variables */
+  --background: hsl(210, 20%, 98%);
+  --surface: hsl(0, 0%, 100%);
+  --surface-hover: hsl(210, 16%, 95%);
+  --text-main: hsl(220, 39%, 11%);
+  --text-muted: hsl(215, 16%, 47%);
+  --border: hsl(214, 32%, 91%);
+  --shadow: 0 4px 20px rgba(0,0,0,0.05);
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.03);
+  
+  /* Spacing & Layout */
+  --sidebar-width: 260px;
+  --header-height: 70px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-full: 9999px;
+  
+  --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-theme="dark"] {
+  --background: hsl(222, 47%, 11%);
+  --surface: hsl(217, 33%, 17%);
+  --surface-hover: hsl(215, 25%, 22%);
+  --text-main: hsl(210, 40%, 98%);
+  --text-muted: hsl(215, 20%, 65%);
+  --border: hsl(217, 33%, 25%);
+  --shadow: 0 4px 20px rgba(0,0,0,0.3);
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.2);
+  --brand-alpha: hsla(var(--brand-hue), 85%, 65%, 0.15);
+  --brand-light: hsl(var(--brand-hue), 85%, 15%);
+}
+
+/* Reset & Typography */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--background);
+  color: var(--text-main);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Layout Framework */
+.app-wrapper {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.app-frame {
+  display: flex;
+  flex: 1;
+  width: 100%;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow-y: auto;
+  position: relative;
+  padding-bottom: 2rem;
+}
+
+/* Header */
+.top-header {
+  height: var(--header-height);
+  padding: 0 2rem;
+  display: flex;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: var(--background);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.top-header-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Base Content Container */
+.content-container {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* Typography Utility */
+h1 { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.025em; }
+h2 { font-size: 1.25rem; font-weight: 600; letter-spacing: -0.025em; }
+h3 { font-size: 1.125rem; font-weight: 600; }
+.text-muted { color: var(--text-muted); }
+.text-sm { font-size: 0.875rem; }
+.text-xs { font-size: 0.75rem; }
+.font-semibold { font-weight: 600; }
+.font-bold { font-weight: 700; }
+
+/* Flex Utility */
+.flex { display: flex; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.justify-center { justify-content: center; }
+.gap-2 { gap: 0.5rem; }
+.gap-3 { gap: 0.75rem; }
+.gap-4 { gap: 1rem; }
+.space-y-4 > * + * { margin-top: 1rem; }
+.space-y-5 > * + * { margin-top: 1.25rem; }
+.space-y-6 > * + * { margin-top: 1.5rem; }
+
+/* Grid Utility */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}

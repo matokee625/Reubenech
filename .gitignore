@@ -1,0 +1,23 @@
+# Sensitive configuration
+connection.php
+.env
+
+# XAMPP / server logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# PHP temp / cache
+*.bak
+*.swp
+*.tmp
+
+# CSV exports
+*.csv
+
+# IDE / editor
+.vscode/
+.idea/
+.antigravityignore

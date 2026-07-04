@@ -1,0 +1,6 @@
+@media print {
+    .sidebar, .topbar, .admin-footer, .btn { display: none !important; }
+    .main-content, .page-content { overflow: visible; height: auto; margin: 0; padding: 0; }
+    body { background: #fff; }
+    .table-card { box-shadow: none; border: 1px solid #000; margin-bottom: 2rem; }
+}
