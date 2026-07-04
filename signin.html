@@ -14,7 +14,7 @@
     <script>
         const supabaseUrl = 'https://hcnnimmosapaiwvthvta.supabase.co';
         const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhjbm5pbW1vc2FwYWl3dnRodnRhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwNzcxMDAsImV4cCI6MjA5ODY1MzEwMH0.BFVr1JKiQPxoOcEJryFItBJ89WxbeCmtCWBAKwv8cjg';
-        const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+        const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
 
         // Handle local file protocol (file://) redirection to prevent downloads
         document.addEventListener("DOMContentLoaded", function () {
@@ -54,7 +54,7 @@
                     submitBtn.disabled = true;
                     submitBtn.textContent = 'LOGGING IN...';
                     
-                    const { data, error } = await supabase.auth.signInWithPassword({
+                    const { data, error } = await supabaseClient.auth.signInWithPassword({
                         email: email,
                         password: password,
                     });
@@ -122,7 +122,7 @@
                             <circle cx="12" cy="7" r="4"></circle>
                         </svg>
                     </span>
-                    <input type="text" id="email" name="email" placeholder="Username" autocomplete="username" required>
+                    <input type="email" id="email" name="email" placeholder="Email Address" autocomplete="email" required>
                 </div>
 
                 <!-- Password Input -->
