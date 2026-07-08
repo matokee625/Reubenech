@@ -3,7 +3,6 @@
 
 <head>
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reubentech Hub - Cooperative Homepage</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -29,11 +28,7 @@
             --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: var(--font-body);
@@ -64,10 +59,7 @@
             color: var(--color-primary);
             letter-spacing: -0.025em;
         }
-
-        .logo span {
-            color: #0f172a;
-        }
+        .logo span { color: #0f172a; }
 
         .nav-grid {
             display: flex;
@@ -85,18 +77,15 @@
             border-radius: var(--radius-md);
             transition: all 0.2s;
         }
-
         .nav-btn:hover {
             color: var(--color-primary);
             background-color: #f1f5f9;
         }
-
         .nav-btn-highlight {
             background-color: var(--color-primary);
             color: white !important;
             box-shadow: 0 4px 8px rgba(5, 150, 105, 0.2);
         }
-
         .nav-btn-highlight:hover {
             background-color: var(--color-primary-hover);
         }
@@ -109,12 +98,7 @@
             text-align: center;
             border-bottom: 1px solid var(--color-border);
         }
-
-        .hero-container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
+        .hero-container { max-width: 800px; margin: 0 auto; }
         .hero h1 {
             font-family: var(--font-heading);
             font-size: 3.5rem;
@@ -124,12 +108,7 @@
             letter-spacing: -0.03em;
             margin-bottom: 1.5rem;
         }
-
-        .hero h1 mark {
-            background: none;
-            color: var(--color-primary);
-        }
-
+        .hero h1 mark { background: none; color: var(--color-primary); }
         .hero p {
             font-size: 1.15rem;
             color: var(--color-text-muted);
@@ -138,7 +117,6 @@
             margin-left: auto;
             margin-right: auto;
         }
-
         .hero-action-buttons {
             display: flex;
             justify-content: center;
@@ -158,54 +136,33 @@
             gap: 0.5rem;
             box-shadow: var(--shadow-sm);
         }
-
         .btn-green {
             background-color: var(--color-primary);
             color: white;
             box-shadow: 0 6px 15px rgba(5, 150, 105, 0.25);
         }
-
-        .btn-green:hover {
-            background-color: var(--color-primary-hover);
-            transform: translateY(-2px);
-        }
-
+        .btn-green:hover { background-color: var(--color-primary-hover); transform: translateY(-2px); }
         .btn-sky {
             background-color: var(--color-secondary);
             color: white;
             box-shadow: 0 6px 15px rgba(2, 132, 199, 0.25);
         }
-
-        .btn-sky:hover {
-            background-color: #0270a5;
-            transform: translateY(-2px);
-        }
-
+        .btn-sky:hover { background-color: #0270a5; transform: translateY(-2px); }
         .btn-white {
             background-color: white;
             color: var(--color-text);
             border: 1px solid var(--color-border);
         }
-
-        .btn-white:hover {
-            background-color: var(--color-bg);
-            transform: translateY(-2px);
-        }
+        .btn-white:hover { background-color: var(--color-bg); transform: translateY(-2px); }
 
         /* Container Section */
-        .main-section {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 5rem 2rem;
-        }
-
+        .main-section { max-width: 1200px; margin: 0 auto; padding: 5rem 2rem; }
         .grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
             gap: 2.5rem;
             margin-top: 3rem;
         }
-
         .card {
             background: var(--color-surface);
             border-radius: var(--radius-lg);
@@ -214,13 +171,11 @@
             box-shadow: var(--shadow-md);
             transition: all 0.25s ease;
         }
-
         .card:hover {
             transform: translateY(-3px);
             box-shadow: var(--shadow-lg);
             border-color: rgba(5, 150, 105, 0.2);
         }
-
         .card-title {
             font-family: var(--font-heading);
             font-size: 1.35rem;
@@ -228,29 +183,20 @@
             margin-bottom: 0.75rem;
             color: #0f172a;
         }
-
         .card p {
             color: var(--color-text-muted);
             font-size: 0.95rem;
             line-height: 1.6;
             margin-bottom: 1.5rem;
         }
-
-        .section-header {
-            text-align: center;
-        }
-
+        .section-header { text-align: center; }
         .section-header h2 {
             font-family: var(--font-heading);
             font-size: 2.25rem;
             font-weight: 800;
             color: #0f172a;
         }
-
-        .section-header p {
-            color: var(--color-text-muted);
-            margin-top: 0.5rem;
-        }
+        .section-header p { color: var(--color-text-muted); margin-top: 0.5rem; }
 
         footer {
             background: #0f172a;
@@ -259,75 +205,36 @@
             padding: 3rem 2rem;
             border-top: 1px solid #1e293b;
         }
-    </style>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            var isFile = window.location.protocol === 'file:';
-            var isLiveServer = window.location.port !== '' && window.location.port !== '80' && window.location.port !== '443';
 
-            if (isFile || isLiveServer) {
-                var links = document.querySelectorAll("a");
-                links.forEach(function (link) {
-                    var href = link.getAttribute("href");
-                    if (href && href.indexOf(".php") !== -1) {
-                        var target = href;
-                        // For relative directory traversal, strip relative prefix
-                        if (href.startsWith("../")) {
-                            target = href.substring(3);
-                        }
-                        link.setAttribute("href", "http://localhost/milkproject/" + target);
-                    }
-                });
-            }
-        });
-    </script>
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.25rem; }
+            header { flex-direction: column; gap: 1rem; }
+            .nav-grid { justify-content: center; }
+        }
+    </style>
 </head>
 
 <body>
 
-    <!-- HEADER (9 Navigation Buttons total on this page) -->
+    <!-- HEADER -->
     <header>
-        <!-- Button 1: Logo Home -->
         <a href="index.html" class="logo">🥛 Reubentech<span>Hub</span></a>
-
         <nav class="nav-grid">
-            <!-- Button 2: Public Notice Board -->
-            <a href="index.html" class="nav-btn">Public Board</a>
-
-            <!-- Button 3: Producer Dashboard -->
-            <a href="signin.html" class="nav-btn">Producer Dashboard</a>
-
-            <!-- Button 4: Administrator Portal -->
-            <a href="signin.html" class="nav-btn">Admin Portal</a>
-
-            <!-- Button 5: Setup Diagnostics -->
-            <a href="signin.html" class="nav-btn">Setup Diagnostics</a>
-
-            <!-- Button 6: System Reports -->
-            <a href="signin.html" class="nav-btn">Coop Reports</a>
-
-            <!-- Button 7: API Documentation -->
-            <a href="signin.html" class="nav-btn">System APIs</a>
-
-            <!-- Button 8: Sign In -->
-            <a href="signin.html" class="nav-btn">Sign In</a>
-
-            <!-- Button 9: Sign Up -->
-            <a href="register.html" class="nav-btn nav-btn-highlight">Register</a>
+            <a href="index.html" class="nav-btn">Home</a>
+            <a href="viewpage.html" class="nav-btn">Sign In</a>
+            <a href="dashboard.html" class="nav-btn">Dashboard</a>
         </nav>
     </header>
 
     <!-- HERO -->
     <section class="hero">
         <div class="hero-container">
-            <h1>Farm-Fresh Dairy cooperative <mark>Digital Marketplace</mark></h1>
+            <h1>Farm-Fresh Dairy Cooperative <mark>Digital Marketplace</mark></h1>
             <p>Welcome to the cooperative network dashboard. Access real-time milk postings, sell supply directly to
                 processing plants, publish advertisements, and review financial ledger invoices.</p>
             <div class="hero-action-buttons">
-                <!-- Button 10: Sign In (Hero Secondary Action) -->
-                <a href="signin.html" class="btn-large btn-green">Access Dashboard Portal</a>
-                <!-- Button 11: Register (Hero Primary Action) -->
-                <a href="register.html" class="btn-large btn-white">Create Producer Account</a>
+                <a href="viewpage.html" class="btn-large btn-green">Access Dashboard Portal</a>
+                <a href="dashboard.html" class="btn-large btn-white">View Dashboard</a>
             </div>
         </div>
     </section>
@@ -345,7 +252,7 @@
                 <h3 class="card-title">🥛 Milk Marketplace</h3>
                 <p>Register as a member to list cow, goat, or camel milk liters, asking price rates, and publish
                     directly to local processors.</p>
-                <a href="signin.html" class="btn-large btn-white"
+                <a href="viewpage.html" class="btn-large btn-white"
                     style="font-size:0.85rem; padding:0.5rem 1rem;">Post Supply</a>
             </div>
 
@@ -354,7 +261,7 @@
                 <h3 class="card-title">🏢 Commercial Buyers</h3>
                 <p>Processors like Brookside Plant, New KCC Cooperative, and Githunguri Dairy purchase fresh stock daily
                     from registered producers.</p>
-                <a href="signin.html" class="btn-large btn-white"
+                <a href="viewpage.html" class="btn-large btn-white"
                     style="font-size:0.85rem; padding:0.5rem 1rem;">Explore Buyers</a>
             </div>
 
@@ -363,7 +270,7 @@
                 <h3 class="card-title">📈 Cooperative Reports</h3>
                 <p>Review gross transaction volumes, estimated commission ledger reports, sales analytics, and download
                     SQL ledger backups.</p>
-                <a href="signin.html" class="btn-large btn-white"
+                <a href="dashboard.html" class="btn-large btn-white"
                     style="font-size:0.85rem; padding:0.5rem 1rem;">View Reports</a>
             </div>
         </div>

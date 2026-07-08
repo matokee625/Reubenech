@@ -4,6 +4,7 @@ connection.php
 
 # XAMPP / server logs
 *.log
+sms_log.txt
 
 # OS files
 .DS_Store
@@ -13,6 +14,22 @@ Thumbs.db
 *.bak
 *.swp
 *.tmp
+
+# Ignore all PHP files (backend code) to keep GitHub Pages static
+*.php
+/**/*.php
+admin/**/*.php
+member/**/*.php
+includes/**/*.php
+config/**/*.php
+api/**/*.php
+
+# Ignore database, container, and logs
+*.sql
+Dockerfile
+deploy.ps1
+users.json
+php proj.txt
 
 # CSV exports
 *.csv
