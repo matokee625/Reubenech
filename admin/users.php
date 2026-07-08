@@ -159,6 +159,7 @@ adminHeader('users', 'User List');
                 <th><input type="checkbox" id="select-all"></th>
                 <th>Name</th>
                 <th>Phone</th>
+                <th>Posted Milk</th>
                 <th>Email</th>
                 <th>Registered</th>
                 <th>Last Login</th>
@@ -199,10 +200,32 @@ adminHeader('users', 'User List');
 <?php if (count($users) > 0): ?>
 <?php foreach ($users as $u): ?>
 
+<?php
+// Get active milk postings for this user
+$active_milk_types = [];
+try {
+    $p_stmt = $conn->prepare("SELECT milk_type, SUM(liters) as total_liters FROM milk_postings WHERE user_id = ? AND status = 'active' GROUP BY milk_type");
+    $p_stmt->execute([$u->id]);
+    $active_milk_types = $p_stmt->fetchAll(PDO::FETCH_OBJ);
+} catch (PDOException $e) {}
+?>
 <tr>
     <td><input type="checkbox" name="uid[]" value="<?= $u->id ?>"></td>
     <td><strong><?= htmlspecialchars($u->username ?? $fallbackNames[$i]) ?></strong></td>
     <td><?= htmlspecialchars($u->phone ?? 'Not Set') ?></td>
+    <td>
+        <?php if (count($active_milk_types) > 0): ?>
+            <div style="display:flex; flex-direction:column; gap:0.25rem;">
+                <?php foreach ($active_milk_types as $amt): ?>
+                    <span class="badge badge-active" style="background:#eff6ff; color:#2563eb; border:1px solid #bfdbfe; font-size:0.75rem; white-space:normal; display:inline-block; padding:0.25rem 0.5rem; border-radius:4px; font-weight:600;">
+                        <?= htmlspecialchars($amt->milk_type) ?>: <strong><?= number_format($amt->total_liters, 1) ?>L</strong>
+                    </span>
+                <?php endforeach; ?>
+            </div>
+        <?php else: ?>
+            <span style="color:#94a3b8; font-size:0.8rem;">No active postings</span>
+        <?php endif; ?>
+    </td>
     <td><?= htmlspecialchars($u->email ?? $fallbackEmails[$i] ?? 'Not Set') ?></td>
     <td><?= htmlspecialchars($u->registered_at ?? 'Not Set') ?></td>
     <td><?= $u->last_login ? htmlspecialchars($u->last_login) : '<span style="color:#94a3b8">Never</span>' ?></td>
@@ -210,7 +233,11 @@ adminHeader('users', 'User List');
                     <?php if ($u->status === 'active'): ?>
                         <span class="badge badge-active">✅ Active</span>
                     <?php elseif ($u->status === 'suspended'): ?>
-                        <span class="badge badge-suspended">⏸ Suspended</span>
+                        <?php if (empty($u->last_login)): ?>
+                            <span class="badge badge-suspended" style="background:#fffde7; color:#854d0e; border:1px solid #fef08a; font-size:0.85rem; padding:0.25rem 0.5rem; border-radius:4px;">⏳ Pending Approval</span>
+                        <?php else: ?>
+                            <span class="badge badge-suspended">⏸ Suspended</span>
+                        <?php endif; ?>
                     <?php else: ?>
                         <span class="badge badge-trash">🗑 Trash</span>
                     <?php endif; ?>
@@ -247,7 +274,9 @@ adminHeader('users', 'User List');
                         <form method="POST" style="display:inline">
                             <input type="hidden" name="user_id" value="<?= $u->id ?>">
                             <input type="hidden" name="action" value="activate">
-                            <button type="submit" class="action-link" style="border:none;background:none;cursor:pointer;color:#16a34a">▶️ Approve / Activate</button>
+                            <button type="submit" class="action-link" style="border:none;background:none;cursor:pointer;color:#16a34a">
+                                <?= empty($u->last_login) ? '✅ Approve' : '▶️ Activate' ?>
+                            </button>
                         </form>
                         <?php endif; ?>
                         <?php if ($u->status !== 'trash'): ?>

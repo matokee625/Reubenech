@@ -267,6 +267,119 @@
             padding: 3rem 2rem;
             border-top: 1px solid #1e293b;
         }
+
+        /* MPesa Payment Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(6px);
+            z-index: 999;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-box {
+            background: #fff;
+            border-radius: var(--radius-lg);
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+            animation: modalIn 0.3s ease;
+        }
+        @keyframes modalIn {
+            from { opacity: 0; transform: translateY(20px) scale(0.97); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .modal-box h3 {
+            font-family: var(--font-heading);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 0.25rem;
+        }
+        .modal-box .modal-subtitle {
+            color: var(--color-text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 1.75rem;
+        }
+        .modal-box label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--color-text);
+            margin-bottom: 0.35rem;
+        }
+        .modal-box input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1.5px solid var(--color-border);
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            font-family: var(--font-body);
+            margin-bottom: 1.25rem;
+            transition: border-color 0.2s;
+            outline: none;
+        }
+        .modal-box input:focus {
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(5,150,105,0.12);
+        }
+        .modal-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+        }
+        .modal-actions button {
+            flex: 1;
+            padding: 0.8rem;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .modal-actions .btn-cancel {
+            background: #f1f5f9;
+            color: var(--color-text-muted);
+        }
+        .modal-actions .btn-cancel:hover { background: #e2e8f0; }
+        .modal-actions .btn-send {
+            background: #16a34a;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(22,163,74,0.3);
+        }
+        .modal-actions .btn-send:hover { background: #15803d; transform: translateY(-1px); }
+        .modal-actions .btn-send:disabled {
+            opacity: 0.6; cursor: not-allowed; transform: none;
+        }
+        .mpesa-badge {
+            display: inline-block;
+            background: #16a34a;
+            color: #fff;
+            font-size: 0.7rem;
+            font-weight: 800;
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            margin-right: 0.4rem;
+            vertical-align: middle;
+            letter-spacing: 0.04em;
+        }
+        #mpesa-status {
+            text-align: center;
+            padding: 0.75rem;
+            border-radius: var(--radius-md);
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-top: 1rem;
+            display: none;
+        }
+        #mpesa-status.success { display: block; background: #f0fdf4; color: #16a34a; }
+        #mpesa-status.error   { display: block; background: #fef2f2; color: #dc2626; }
+        #mpesa-status.loading { display: block; background: #f0f9ff; color: #0284c7; }
     </style>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
@@ -336,6 +449,8 @@
                 <a href="login.php" class="btn-large btn-green">Access Dashboard Portal</a>
                 <!-- Button 11: Register (Hero Primary Action) -->
                 <a href="register.php" class="btn-large btn-white">Create Producer Account</a>
+                <!-- Button 12: Pay with MPesa -->
+                <button id="mpesa-pay-btn" class="btn-large btn-sky">Pay with MPesa</button>
             </div>
         </div>
     </section>
@@ -380,6 +495,102 @@
     <footer>
         <p>&copy; 2026 Reubentech Hub — Dairy Cooperative System. All rights reserved.</p>
     </footer>
+
+    <!-- MPesa Payment Modal -->
+    <div id="mpesa-modal" class="modal-overlay">
+        <div class="modal-box">
+  <h3><span class="mpesa-badge">M-PESA</span> Pay Now</h3>
+                    <p class="modal-subtitle">Enter your phone number to receive the MPesa payment prompt.<br>Account: <strong>REUBENTECH MILK SOLUTIONS</strong></p>
+                    <form id="mpesa-form">
+                        <label for="mpesa-phone">Phone Number</label>
+                        <input type="tel" id="mpesa-phone" name="phone" placeholder="e.g. 0712345678" required>
+                        <label for="mpesa-amount">Amount (KES)</label>
+                        <input type="number" id="mpesa-amount" name="amount" placeholder="e.g. 500" min="1" required>
+                        <input type="hidden" id="mpesa-product" name="product_id" value="">
+                        <div class="modal-actions">
+                            <button type="button" class="btn-cancel" id="mpesa-cancel">Cancel</button>
+                            <button type="submit" class="btn-send" id="mpesa-submit">Send Prompt</button>
+                        </div>
+                        <div id="mpesa-status"></div>
+                    </form>
+        </div>
+    </div>
+
+<script>
+(function() {
+    const modal   = document.getElementById('mpesa-modal');
+    const form    = document.getElementById('mpesa-form');
+    const phoneIn = document.getElementById('mpesa-phone');
+    const amtIn   = document.getElementById('mpesa-amount');
+    const status  = document.getElementById('mpesa-status');
+    const submitBtn = document.getElementById('mpesa-submit');
+
+    // Open modal
+    // Desktop modal open listener removed – mobile-only handling is below
+
+    // Close modal
+    document.getElementById('mpesa-cancel').addEventListener('click', () => {
+        modal.classList.remove('active');
+    });
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.classList.remove('active');
+    });
+
+    // Open modal – only on mobile devices
+    if (typeof document !== 'undefined') {
+        const mpesaBtn = document.getElementById('mpesa-pay-btn');
+        if (mpesaBtn) {
+            mpesaBtn.addEventListener('click', () => {
+                // Detect mobile user agents
+                const isMobile = /Mobi|Android|iPhone|iPad|iPod|Phone|Mobile/i.test(navigator.userAgent);
+                if (!isMobile) {
+                    // On desktop, just show a brief notice instead of the modal
+                    // No alert on desktop
+                    return;
+                }
+                modal.classList.add('active');
+                status.className = '';
+                status.textContent = '';
+                status.style.display = 'none';
+                phoneIn.value = '';
+                amtIn.value = '';
+            });
+            // Desktop modal listener removed – mobile-only handling is defined later in the script    
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const phone = phoneIn.value;
+                const amount = amtIn.value;
+                status.className = 'loading';
+                status.textContent = 'Processing...';
+                status.style.display = 'block';
+
+                fetch('mpesa_initiate.php', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    body: `phone=${encodeURIComponent(phone)}&amount=${amount}`
+                })
+                .then(r => r.json().then(data => ({ok: r.ok, data})))
+                .then(res => {
+                    if (res.ok) {
+                        status.className = 'success';
+                        status.textContent = 'Prompt sent – check your phone for the MPesa PIN entry.';
+                    } else {
+                        status.className = 'error';
+                        status.textContent = res.data.error || 'Failed to send prompt';
+                    }
+                })
+                .catch(() => {
+                    status.className = 'error';
+                    status.textContent = 'Network error';
+                })
+                .finally(() => {
+                    setTimeout(() => { status.style.display = 'none'; }, 5000);
+                });
+            });
+        }
+    }
+})();
+</script>
 
 </body>
 

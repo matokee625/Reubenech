@@ -10,14 +10,19 @@ try {
     $total_admins    = $conn->query("SELECT COUNT(*) FROM users WHERE role='admin'")->fetchColumn();
     $total_postings  = $conn->query("SELECT COUNT(*) FROM milk_postings")->fetchColumn();
     $total_volume    = $conn->query("SELECT SUM(liters) FROM milk_postings")->fetchColumn() ?? 0;
-    $total_revenue   = $conn->query("SELECT SUM(liters * asking_price) FROM milk_postings WHERE status='sold'")->fetchColumn() ?? 0;
+    
+    // Financial metrics derived from transaction records (the source of truth)
+    $gross_sales     = $conn->query("SELECT SUM(price) FROM transactions WHERE status='completed'")->fetchColumn() ?? 0;
+    $pending_sales   = $conn->query("SELECT SUM(price) FROM transactions WHERE status='pending'")->fetchColumn() ?? 0;
+    $coop_commission = $gross_sales * 0.05; // 5% platform commission on completed trades
+    
     $total_ads       = $conn->query("SELECT COUNT(*) FROM advertisements")->fetchColumn();
     $total_trans     = $conn->query("SELECT COUNT(*) FROM transactions")->fetchColumn();
 
     // By milk type
     $by_type = $conn->query("SELECT milk_type, COUNT(*) as cnt, SUM(liters) as vol FROM milk_postings GROUP BY milk_type")->fetchAll(PDO::FETCH_OBJ);
 } catch (PDOException $e) {
-    $total_users = $total_members = $total_admins = $total_postings = $total_volume = $total_revenue = $total_ads = $total_trans = 0;
+    $total_users = $total_members = $total_admins = $total_postings = $total_volume = $gross_sales = $pending_sales = $coop_commission = $total_ads = $total_trans = 0;
     $by_type = [];
     $error = $e->getMessage();
 }
@@ -45,14 +50,46 @@ adminHeader('data', 'Overview');
 <?php endif; ?>
 
 <div class="stats-row">
-    <div class="stat-card blue"><div class="stat-card-label">Total Users</div><div class="stat-card-value"><?= $total_users ?></div></div>
-    <div class="stat-card green"><div class="stat-card-label">Members</div><div class="stat-card-value"><?= $total_members ?></div></div>
-    <div class="stat-card"><div class="stat-card-label">Admins</div><div class="stat-card-value"><?= $total_admins ?></div></div>
-    <div class="stat-card amber"><div class="stat-card-label">Milk Postings</div><div class="stat-card-value"><?= $total_postings ?></div></div>
-    <div class="stat-card blue"><div class="stat-card-label">Total Volume (L)</div><div class="stat-card-value"><?= number_format($total_volume) ?></div></div>
-    <div class="stat-card green"><div class="stat-card-label">Revenue (Ksh)</div><div class="stat-card-value"><?= number_format($total_revenue) ?></div></div>
-    <div class="stat-card"><div class="stat-card-label">Advertisements</div><div class="stat-card-value"><?= $total_ads ?></div></div>
-    <div class="stat-card"><div class="stat-card-label">Transactions</div><div class="stat-card-value"><?= $total_trans ?></div></div>
+    <div class="stat-card blue">
+        <div class="stat-card-label">Total Users</div>
+        <div class="stat-card-value"><?= $total_users ?></div>
+        <div class="stat-card-sub">Registered accounts</div>
+    </div>
+    <div class="stat-card green">
+        <div class="stat-card-label">Members</div>
+        <div class="stat-card-value"><?= $total_members ?></div>
+        <div class="stat-card-sub">Active dairy suppliers</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-card-label">Admins</div>
+        <div class="stat-card-value"><?= $total_admins ?></div>
+        <div class="stat-card-sub">Coop staff/operators</div>
+    </div>
+    <div class="stat-card amber">
+        <div class="stat-card-label">Milk Postings</div>
+        <div class="stat-card-value"><?= $total_postings ?></div>
+        <div class="stat-card-sub">Total listings posted</div>
+    </div>
+    <div class="stat-card blue">
+        <div class="stat-card-label">Total Volume (L)</div>
+        <div class="stat-card-value"><?= number_format($total_volume, 1) ?></div>
+        <div class="stat-card-sub">Liters in system</div>
+    </div>
+    <div class="stat-card green">
+        <div class="stat-card-label">Gross Sales (Ksh)</div>
+        <div class="stat-card-value">Ksh <?= number_format($gross_sales) ?></div>
+        <div class="stat-card-sub">Completed (Pending: Ksh <?= number_format($pending_sales) ?>)</div>
+    </div>
+    <div class="stat-card amber">
+        <div class="stat-card-label">Cooperative Fee (5%)</div>
+        <div class="stat-card-value">Ksh <?= number_format($coop_commission, 2) ?></div>
+        <div class="stat-card-sub">Platform commission earned</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-card-label">Transactions</div>
+        <div class="stat-card-value"><?= $total_trans ?></div>
+        <div class="stat-card-sub">Total sales records</div>
+    </div>
 </div>
 
 <?php

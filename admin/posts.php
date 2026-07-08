@@ -89,7 +89,7 @@ $sql .= " ORDER BY mp.posted_at DESC";
 try {
     $stmt = $conn->prepare($sql);
     $stmt->execute($params);
-    $posts = $stmt->fetchAll();
+    $posts = $stmt->fetchAll(PDO::FETCH_OBJ);
 
     $total_vol    = $conn->query("SELECT SUM(liters) FROM milk_postings WHERE status='active'")->fetchColumn();
     $total_active = $conn->query("SELECT COUNT(*) FROM milk_postings WHERE status='active'")->fetchColumn();
@@ -129,9 +129,27 @@ adminHeader('posts', 'All Posts');
             <div class="form-group" style="margin-bottom: 1.25rem;">
                 <label style="display:block; font-weight:600; margin-bottom:0.5rem;">Milk Type</label>
                 <select name="milk_type" style="width:100%; padding:0.75rem; border:1px solid #cbd5e1; border-radius:6px; background:white;">
-                    <option value="Cow">Cow</option>
-                    <option value="Goat">Goat</option>
-                    <option value="Camel">Camel</option>
+                    <!-- Cow Milk Options -->
+                    <optgroup label="Cow Milk">
+                        <option value="Cow - Raw Whole Milk (Chilled)">Cow - Raw Whole Milk (Chilled)</option>
+                        <option value="Cow - Fermented Milk (Maziwa Lala)">Cow - Fermented Milk (Maziwa Lala)</option>
+                        <option value="Cow - Pasteurized Packet Milk">Cow - Pasteurized Packet Milk</option>
+                        <option value="Cow - UHT Long Life Milk">Cow - UHT Long Life Milk</option>
+                    </optgroup>
+                    <!-- Goat Milk Options -->
+                    <optgroup label="Goat Milk">
+                        <option value="Goat - Raw Whole Milk (Chilled)">Goat - Raw Whole Milk (Chilled)</option>
+                        <option value="Goat - Fermented Milk (Maziwa Lala)">Goat - Fermented Milk (Maziwa Lala)</option>
+                        <option value="Goat - Pasteurized Packet Milk">Goat - Pasteurized Packet Milk</option>
+                        <option value="Goat - UHT Long Life Milk">Goat - UHT Long Life Milk</option>
+                    </optgroup>
+                    <!-- Camel Milk Options -->
+                    <optgroup label="Camel Milk">
+                        <option value="Camel - Raw Whole Milk (Chilled)">Camel - Raw Whole Milk (Chilled)</option>
+                        <option value="Camel - Fermented Milk (Maziwa Lala)">Camel - Fermented Milk (Maziwa Lala)</option>
+                        <option value="Camel - Pasteurized Packet Milk">Camel - Pasteurized Packet Milk</option>
+                        <option value="Camel - UHT Long Life Milk">Camel - UHT Long Life Milk</option>
+                    </optgroup>
                 </select>
             </div>
 
@@ -221,56 +239,31 @@ adminHeader('posts', 'All Posts');
             </tr>
         </thead>
         <tbody>
-        <?php
-// Fetch posts as objects
-try {
-    $stmt = $conn->prepare($sql);
-    $stmt->execute($params);
-    $posts = $stmt->fetchAll(PDO::FETCH_OBJ);
-} catch (PDOException $e) { $posts = []; $error = $e->getMessage(); }
-?>
-<?php
-// Sample inventory data
-$samplePosts = [
-    ["id"=>"MK-001", "seller"=>"Brookside Dairy Ltd", "type"=>"Fresh Pasteurized Whole Milk", "volume"=>0.5, "price"=>60, "status"=>"active", "posted_at"=>"2024-01-10 09:00"],
-    ["id"=>"MK-002", "seller"=>"New KCC", "type"=>"Gold Crown Premium Milk", "volume"=>0.5, "price"=>65, "status"=>"active", "posted_at"=>"2024-01-12 11:30"],
-    ["id"=>"MK-003", "seller"=>"Githunguri Dairy", "type"=>"Whole Fresh Cow Milk", "volume"=>0.5, "price"=>55, "status"=>"sold", "posted_at"=>"2024-01-15 14:45"],
-    ["id"=>"MK-004", "seller"=>"Brookside Dairy Ltd", "type"=>"UHT Long Life Milk", "volume"=>0.5, "price"=>65, "status"=>"active", "posted_at"=>"2024-01-18 08:20"],
-    ["id"=>"MK-005", "seller"=>"New KCC", "type"=>"KCC Plain Maziwa Lala", "volume"=>0.5, "price"=>60, "status"=>"cancelled", "posted_at"=>"2024-01-20 13:10"],
-    ["id"=>"MK-006", "seller"=>"Brookside Dairy Ltd", "type"=>"Best Maziwa Lala Fermented", "volume"=>1, "price"=>130, "status"=>"active", "posted_at"=>"2024-01-22 10:05"],
-    ["id"=>"MK-007", "seller"=>"Kinangop Dairy Ltd", "type"=>"Kinangop Fresh Whole Milk", "volume"=>0.5, "price"=>55, "status"=>"active", "posted_at"=>"2024-01-25 12:30"],
-    ["id"=>"MK-008", "seller"=>"Brookside Dairy Ltd", "type"=>"UHT Long Life Whole Milk", "volume"=>1, "price"=>140, "status"=>"active", "posted_at"=>"2024-01-28 09:45"],
-    ["id"=>"MK-009", "seller"=>"Bio Foods Ltd", "type"=>"Strawberry Real Fruit Yogurt", "volume"=>0.45, "price"=>160, "status"=>"active", "posted_at"=>"2024-02-01 07:50"],
-    ["id"=>"MK-010", "seller"=>"Delamere", "type"=>"Premium Vanilla Flavored Milk", "volume"=>0.5, "price"=>75, "status"=>"active", "posted_at"=>"2024-02-03 15:20"]
-];
-$posts = $samplePosts; // Override with sample data for display
-?>
 <?php if(count($posts) > 0): ?>
 <?php foreach($posts as $p): ?>
 <tr>
-    <td><input type="checkbox" name="pid[]" value="<?php echo $p['id']; ?>"/></td>
-    <td><?php echo $p['id']; ?></td>
-    <td><strong><?php echo htmlspecialchars($p['seller']); ?></strong><br><a href="#" style="font-size:0.75rem;">Contact</a></td>
-    <td><?php echo htmlspecialchars($p['type']); ?></td>
-    <td><?php echo number_format($p['volume'], 2); ?> L</td>
-    <td>Ksh <?php echo number_format($p['price'], 2); ?></td>
+    <td><input type="checkbox" name="pid[]" value="<?= $p->id ?>"/></td>
+    <td>#<?= $p->id ?></td>
+    <td><strong><?= htmlspecialchars($p->username) ?></strong><br><a href="#" style="font-size:0.75rem;">Contact</a></td>
+    <td><?= htmlspecialchars($p->milk_type) ?></td>
+    <td><?= number_format($p->liters, 2) ?> L</td>
+    <td>Ksh <?= number_format($p->asking_price, 2) ?></td>
     <td>
-        <?php if($p['status'] === 'active'): ?>
+        <?php if($p->status === 'active'): ?>
             <span class="badge badge-active">Active</span>
-        <?php elseif($p['status'] === 'sold'): ?>
+        <?php elseif($p->status === 'sold'): ?>
             <span class="badge badge-completed">Sold</span>
-        <?php elseif($p['status'] === 'cancelled'): ?>
+        <?php elseif($p->status === 'cancelled'): ?>
             <span class="badge badge-cancelled">Cancelled</span>
         <?php endif; ?>
     </td>
-    <td><?php echo date('d M Y, H:i', strtotime($p['posted_at'])); ?></td>
+    <td><?= date('d M Y, H:i', strtotime($p->posted_at)) ?></td>
     <td>
-        <div style="display:flex; gap:0.25rem;">
-            <!-- Actions placeholders -->
-            <form method="POST"><button type="submit" class="action-link" style="border:none;background:none;color:green;cursor:pointer;">✔️ Sold</button></form>
-            <form method="POST"><button type="submit" class="action-link" style="border:none;background:none;color:blue;cursor:pointer;">🔄 Active</button></form>
-            <form method="POST"><button type="submit" class="action-link" style="border:none;background:none;color:orange;cursor:pointer;">🚫 Cancel</button></form>
-            <form method="POST"><button type="submit" class="action-link" style="border:none;background:none;color:red;cursor:pointer;">🗑 Delete</button></form>
+        <div style="display:flex; gap:0.25rem; flex-wrap:wrap;">
+            <form method="POST"><input type="hidden" name="action" value="mark_sold"><input type="hidden" name="post_id" value="<?= $p->id ?>"><button type="submit" class="action-link" style="border:none;background:none;color:green;cursor:pointer;" title="Mark as Sold">✔️ Sold</button></form>
+            <form method="POST"><input type="hidden" name="action" value="mark_active"><input type="hidden" name="post_id" value="<?= $p->id ?>"><button type="submit" class="action-link" style="border:none;background:none;color:blue;cursor:pointer;" title="Reactivate">🔄 Active</button></form>
+            <form method="POST"><input type="hidden" name="action" value="cancel"><input type="hidden" name="post_id" value="<?= $p->id ?>"><button type="submit" class="action-link" style="border:none;background:none;color:orange;cursor:pointer;" title="Cancel">🚫 Cancel</button></form>
+            <form method="POST" onsubmit="return confirm('Permanently delete this posting?');"><input type="hidden" name="action" value="delete"><input type="hidden" name="post_id" value="<?= $p->id ?>"><button type="submit" class="action-link" style="border:none;background:none;color:red;cursor:pointer;" title="Delete">🗑 Delete</button></form>
         </div>
     </td>
 </tr>

@@ -222,7 +222,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 $phone_stmt->execute([$_SESSION['user_id']]);
                 $u_phone = $phone_stmt->fetchColumn();
 
-                $notif_msg = "Member '" . $_SESSION['username'] . "' has requested route access/guidance to reach the market: " . $market_name . ". Contact Details: " . ($u_phone ? $u_phone : 'Not Provided');
+                // Fetch active postings to let admin know the milk type
+                $active_p_stmt = $conn->prepare("SELECT milk_type, SUM(liters) as total_liters FROM milk_postings WHERE user_id = ? AND status = 'active' GROUP BY milk_type");
+                $active_p_stmt->execute([$_SESSION['user_id']]);
+                $milk_details = $active_p_stmt->fetchAll(PDO::FETCH_OBJ);
+                
+                $milk_info = [];
+                foreach ($milk_details as $md) {
+                    $milk_info[] = $md->milk_type . " (" . number_format($md->total_liters, 1) . "L)";
+                }
+                $milk_info_str = count($milk_info) > 0 ? implode(', ', $milk_info) : 'No active postings';
+
+                $notif_msg = "Member '" . $_SESSION['username'] . "' has requested route access to: " . $market_name . ". Posted Milk: [" . $milk_info_str . "]. Contact Details: " . ($u_phone ? $u_phone : 'Not Provided');
                 $stmt = $conn->prepare("INSERT INTO notifications (type, title, message, link) VALUES ('info', 'Market Route Access Request', ?, 'users.php')");
                 $stmt->execute([$notif_msg]);
                 $message = "Access request sent successfully! The administrator has been notified and will contact you to help you reach the market.";
@@ -620,6 +631,69 @@ $markets = [
       @keyframes stkSpin {
           to { transform: rotate(360deg); }
       }
+
+      /* Manual Support Section Style Classes */
+      .support-heading {
+          font-size: 1rem;
+          font-weight: 700;
+          color: var(--text-dark);
+          margin-bottom: 0.5rem;
+      }
+      .support-text {
+          color: var(--text-muted);
+          margin-bottom: 1rem;
+          font-size: 0.85rem;
+          line-height: 1.4;
+      }
+      .support-buttons {
+          display: flex;
+          flex-direction: column;
+          gap: 0.75rem;
+      }
+      .support-btn-whatsapp {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+          background: #25D366;
+          color: white;
+          border: none;
+          padding: 0.75rem 1rem;
+          font-weight: bold;
+          font-size: 1rem;
+          border-radius: 8px;
+          text-decoration: none;
+          width: 100%;
+          transition: opacity 0.2s, transform 0.1s;
+      }
+      .support-btn-whatsapp:hover {
+          opacity: 0.9;
+      }
+      .support-btn-whatsapp:active {
+          transform: scale(0.98);
+      }
+      .support-btn-call {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+          border: 1px solid #006837;
+          color: #006837;
+          background: transparent;
+          padding: 0.75rem 1rem;
+          font-weight: bold;
+          font-size: 1rem;
+          border-radius: 8px;
+          text-decoration: none;
+          width: 100%;
+          transition: background-color 0.2s, transform 0.1s;
+      }
+      .support-btn-call:hover {
+          background-color: rgba(0, 104, 55, 0.05);
+      }
+      .support-btn-call:active {
+          transform: scale(0.98);
+      }
   </style>
 </head>
 <body>
@@ -956,15 +1030,15 @@ $markets = [
                         
                         <hr style="border: 0; border-top: 1px solid var(--border); margin: 1.5rem 0;">
                         
-                        <h4 style="font-size: 1rem; font-weight: 700; color: var(--text-dark); margin-bottom: 0.5rem;">Need Manual Support?</h4>
-                        <p style="color: var(--text-muted); margin-bottom: 1rem; font-size: 0.85rem;">
+                        <h4 class="support-heading">Need Manual Support?</h4>
+                        <p class="support-text">
                             If you paid via Co-op Bank or need help, contact the administrator.
                         </p>
-                        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                            <a href="https://wa.me/254799031535?text=Hello%20Admin,%20I%20need%20my%20dairy%20account%20verified%20and%20unlocked%20for%20live%20markets.%20My%20username%20is:%20<?= urlencode($_SESSION['username']) ?>" class="btn" style="display:flex; align-items:center; justify-content:center; gap:0.5rem; background:#25D366; color:white; border:none; padding:0.75rem 1rem; font-weight:bold; font-size:1rem; border-radius:8px; text-decoration:none; width: 100%; transition: opacity 0.2s;" target="_blank" onmouseover="this.style.opacity=0.9" onmouseout="this.style.opacity=1">
+                        <div class="support-buttons">
+                            <a href="https://wa.me/254799031535?text=Hello%20Admin,%20I%20need%20my%20dairy%20account%20verified%20and%20unlocked%20for%20live%20markets.%20My%20username%20is:%20<?= urlencode($_SESSION['username']) ?>" class="support-btn-whatsapp" target="_blank">
                                 💬 Contact Admin on WhatsApp
                             </a>
-                            <a href="tel:0799031535" class="btn btn-outline" style="display:flex; align-items:center; justify-content:center; gap:0.5rem; border-color:#006837; color:#006837; padding:0.75rem 1rem; font-weight:bold; font-size:1rem; border-radius:8px; text-decoration:none; width: 100%;">
+                            <a href="tel:0799031535" class="support-btn-call">
                                 📞 Call Admin: 0799031535
                             </a>
                         </div>
@@ -988,9 +1062,27 @@ $markets = [
                   <div class="form-group" style="margin-bottom: 1.25rem;">
                     <label class="form-label" for="milk_type">Milk Type</label>
                     <select class="form-select" id="milk_type" name="milk_type">
-                      <option value="Cow">Cow Milk</option>
-                      <option value="Goat">Goat Milk</option>
-                      <option value="Camel">Camel Milk</option>
+                      <!-- Cow Milk Options -->
+                      <optgroup label="Cow Milk">
+                        <option value="Cow - Raw Whole Milk (Chilled)">Cow - Raw Whole Milk (Chilled)</option>
+                        <option value="Cow - Fermented Milk (Maziwa Lala)">Cow - Fermented Milk (Maziwa Lala)</option>
+                        <option value="Cow - Pasteurized Packet Milk">Cow - Pasteurized Packet Milk</option>
+                        <option value="Cow - UHT Long Life Milk">Cow - UHT Long Life Milk</option>
+                      </optgroup>
+                      <!-- Goat Milk Options -->
+                      <optgroup label="Goat Milk">
+                        <option value="Goat - Raw Whole Milk (Chilled)">Goat - Raw Whole Milk (Chilled)</option>
+                        <option value="Goat - Fermented Milk (Maziwa Lala)">Goat - Fermented Milk (Maziwa Lala)</option>
+                        <option value="Goat - Pasteurized Packet Milk">Goat - Pasteurized Packet Milk</option>
+                        <option value="Goat - UHT Long Life Milk">Goat - UHT Long Life Milk</option>
+                      </optgroup>
+                      <!-- Camel Milk Options -->
+                      <optgroup label="Camel Milk">
+                        <option value="Camel - Raw Whole Milk (Chilled)">Camel - Raw Whole Milk (Chilled)</option>
+                        <option value="Camel - Fermented Milk (Maziwa Lala)">Camel - Fermented Milk (Maziwa Lala)</option>
+                        <option value="Camel - Pasteurized Packet Milk">Camel - Pasteurized Packet Milk</option>
+                        <option value="Camel - UHT Long Life Milk">Camel - UHT Long Life Milk</option>
+                      </optgroup>
                     </select>
                   </div>
                   <div class="form-group" style="margin-bottom: 1.5rem;">
@@ -1336,73 +1428,6 @@ $markets = [
       </div>
   </div>
 
-  <!-- M-PESA STK PUSH OVERLAY SIMULATOR -->
-  <div id="mpesaSimulatorOverlay" class="phone-simulator-overlay" style="display: none;">
-      <div class="phone-device">
-          <div class="phone-notch"></div>
-          <div class="phone-screen">
-              <div class="phone-header-bar">
-                  <span id="simTime">12:00</span>
-                  <span style="display:flex; gap:0.25rem; align-items:center;">
-                      <span>📶 Safaricom</span>
-                      <span>🔋 96%</span>
-                  </span>
-              </div>
-              <div class="phone-body">
-                  <!-- Safaricom top branding -->
-                  <div style="text-align:center; padding: 0.5rem 0;">
-                      <span style="font-weight: 800; color: #4b9e37; font-size: 1.1rem; letter-spacing:-0.5px;">Safaricom</span>
-                      <span style="font-weight: 400; color: #334155; font-size: 0.8rem; display:block;">Lipa Na M-Pesa Online</span>
-                  </div>
-
-                  <!-- STK Prompt Dialog -->
-                  <div class="stk-popup" id="stkDialog">
-                      <div class="stk-logo-header">
-                          <span style="background:#006837; color:white; border-radius:3px; padding:0.15rem 0.35rem; font-size:0.65rem; font-weight:800;">M-PESA</span>
-                          <span>Express Checkout</span>
-                      </div>
-                      <div class="stk-details">
-                          Do you want to pay <strong id="simAmountText">Ksh 500</strong> to <strong>REUBEN MATOKE (Co-op Bank)</strong> Account no. <strong id="simRefText">1115252</strong>?<br>
-                          Enter M-Pesa PIN:
-                      </div>
-                      
-                      <div class="stk-pin-display">
-                          <span class="stk-dot"></span>
-                          <span class="stk-dot"></span>
-                          <span class="stk-dot"></span>
-                          <span class="stk-dot"></span>
-                      </div>
-                  </div>
-
-                  <!-- In-phone loader -->
-                  <div id="stkLoader" style="display:none; position:absolute; inset:0; background:rgba(241, 245, 249, 0.95); z-index:100; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:2rem; border-radius:26px;">
-                      <div class="stk-spinner" style="width: 44px; height: 44px; border: 4px solid #cbd5e1; border-top-color: #006837; border-radius: 50%; animation: stkSpin 1s linear infinite; margin-bottom: 1.25rem;"></div>
-                      <h4 class="font-bold" style="color:#006837; font-size:0.95rem; margin-bottom:0.25rem;" id="stkLoaderText">Processing PIN...</h4>
-                      <p class="text-xs text-muted">Verifying secure payment transaction with Safaricom. Please wait.</p>
-                  </div>
-
-                  <!-- Custom Keypad -->
-                  <div>
-                      <div class="phone-keyboard">
-                          <div class="key-btn" onclick="pressSimKey('1')">1</div>
-                          <div class="key-btn" onclick="pressSimKey('2')">2</div>
-                          <div class="key-btn" onclick="pressSimKey('3')">3</div>
-                          <div class="key-btn" onclick="pressSimKey('4')">4</div>
-                          <div class="key-btn" onclick="pressSimKey('5')">5</div>
-                          <div class="key-btn" onclick="pressSimKey('6')">6</div>
-                          <div class="key-btn" onclick="pressSimKey('7')">7</div>
-                          <div class="key-btn" onclick="pressSimKey('8')">8</div>
-                          <div class="key-btn" onclick="pressSimKey('9')">9</div>
-                          <div class="key-btn action" style="color:#dc2626;" onclick="closeMpesaSimulator()">Cancel</div>
-                          <div class="key-btn" onclick="pressSimKey('0')">0</div>
-                          <div class="key-btn action" onclick="pressSimKey('back')">⌫</div>
-                      </div>
-                      <div class="phone-home-line"></div>
-                  </div>
-              </div>
-          </div>
-      </div>
-  </div>
 
   <script src="../js/dashboard.js"></script>
   <script>
@@ -1418,10 +1443,6 @@ $markets = [
       }
 
       // --- M-Pesa Integration JavaScript ---
-      let currentSimPhone = "";
-      let currentSimAmount = 500;
-      let simPin = "";
-      let simCheckoutId = "";
       let currentPaymentType = "verification"; // "verification" or "post_milk"
 
       function switchPaymentTab(tabName) {
@@ -1454,18 +1475,7 @@ $markets = [
               submitBtn.innerHTML = originalBtnHTML;
               
               if (data.status === 'success') {
-                  simCheckoutId = data.CheckoutRequestID;
-                  currentSimPhone = phoneInput;
-                  currentSimAmount = amount;
-                  
-                  if (data.mode === 'mock') {
-                      // Open the interactive simulated checkout screen
-                      openMpesaSimulator(phoneInput, amount, '1115252');
-                  } else {
-                      // Production mode: Wait for Safaricom callback on background
-                      alert('Please complete the verification payment on your phone.');
-                      location.reload();
-                  }
+                  showStkWaiting(phoneInput, 'Please check your phone and enter your M-Pesa PIN to complete the Ksh ' + amount + ' verification payment to REUBENTECH SOLUTIONS (Account 1115252).');
               } else {
                   alert('Initiation failed: ' + (data.message || 'Error occurred.'));
               }
@@ -1504,16 +1514,7 @@ $markets = [
               submitBtn.innerHTML = originalBtnHTML;
               
               if (data.status === 'success') {
-                  simCheckoutId = data.CheckoutRequestID;
-                  currentSimPhone = phoneInput;
-                  currentSimAmount = amount;
-                  
-                  if (data.mode === 'mock') {
-                      openMpesaSimulator(phoneInput, amount, '1115252');
-                  } else {
-                      alert('Please complete the posting fee payment on your phone.');
-                      location.reload();
-                  }
+                  showStkWaiting(phoneInput, 'Please check your phone and enter your M-Pesa PIN to pay the Ksh ' + amount + ' posting fee to REUBENTECH SOLUTIONS (Account 1115252).');
               } else {
                   alert('Initiation failed: ' + (data.message || 'Error occurred.'));
               }
@@ -1546,17 +1547,7 @@ $markets = [
               submitBtn.innerHTML = originalBtnHTML;
               
               if (data.status === 'success') {
-                  simCheckoutId = data.CheckoutRequestID;
-                  currentSimPhone = phoneInput;
-                  
-                  if (data.mode === 'mock') {
-                      // Open the interactive simulated checkout screen
-                      openMpesaSimulator(phoneInput, amount, '1115252');
-                  } else {
-                      // Production mode: Wait for Safaricom callback on background
-                      alert('please REUBENTECH SOLUTIONS TO RECEIVE');
-                      location.reload();
-                  }
+                  showStkWaiting(phoneInput, 'Please check your phone and enter your M-Pesa PIN to complete the Ksh ' + amount + ' payment to REUBENTECH SOLUTIONS (Account 1115252).');
               } else {
                   alert('Initiation failed: ' + (data.message || 'Error occurred.'));
               }
@@ -1568,110 +1559,42 @@ $markets = [
           });
       }
 
-      function openMpesaSimulator(phone, amount, ref) {
-          currentSimPhone = phone;
-          currentSimAmount = amount;
-          simPin = "";
-          updatePinDisplay();
-          
-          // Update clock time on phone simulator
-          const now = new Date();
-          const hours = String(now.getHours()).padStart(2, '0');
-          const minutes = String(now.getMinutes()).padStart(2, '0');
-          document.getElementById('simTime').textContent = hours + ':' + minutes;
-          document.getElementById('simAmountText').textContent = 'Ksh ' + amount;
-          document.getElementById('simRefText').textContent = ref || '1115252';
-          
-          document.getElementById('mpesaSimulatorOverlay').style.display = 'flex';
+      // ── STK Waiting Banner ───────────────────────
+      let stkPollInterval = null;
+
+      function showStkWaiting(phone, message) {
+          const existing = document.getElementById('stkWaitingBanner');
+          if (existing) existing.remove();
+
+          const banner = document.createElement('div');
+          banner.id = 'stkWaitingBanner';
+          banner.style.cssText = [
+              'position:fixed', 'bottom:1.5rem', 'left:50%', 'transform:translateX(-50%)',
+              'background:#065f46', 'color:#fff', 'padding:1rem 1.5rem', 'border-radius:12px',
+              'box-shadow:0 8px 30px rgba(0,0,0,0.25)', 'z-index:9999',
+              'max-width:90vw', 'text-align:center', 'font-family:sans-serif'
+          ].join(';');
+          banner.innerHTML = `
+              <div style="font-size:1.4rem;margin-bottom:.4rem;">📲</div>
+              <strong>STK Push Sent to ${phone}</strong>
+              <p style="margin:.4rem 0 0;font-size:.9rem;opacity:.9;">${message}</p>
+              <div style="margin-top:.8rem;font-size:.8rem;opacity:.7;">Waiting for payment confirmation&hellip;</div>
+              <button onclick="dismissStkBanner()" style="margin-top:.8rem;background:rgba(255,255,255,.15);border:none;color:#fff;padding:.3rem .9rem;border-radius:6px;cursor:pointer;font-size:.85rem;">Dismiss</button>
+          `;
+          document.body.appendChild(banner);
+
+          stkPollInterval = setTimeout(() => {
+              dismissStkBanner();
+              location.reload();
+          }, 30000);
       }
 
-      function closeMpesaSimulator() {
-          document.getElementById('mpesaSimulatorOverlay').style.display = 'none';
+      function dismissStkBanner() {
+          const b = document.getElementById('stkWaitingBanner');
+          if (b) b.remove();
+          if (stkPollInterval) { clearTimeout(stkPollInterval); stkPollInterval = null; }
       }
 
-      function pressSimKey(key) {
-          if (key === 'clear') {
-              simPin = "";
-          } else if (key === 'back') {
-              simPin = simPin.slice(0, -1);
-          } else {
-              if (simPin.length < 4) {
-                  simPin += key;
-              }
-          }
-          updatePinDisplay();
-          
-          // Auto-submit simulation once 4 PIN digits are typed
-          if (simPin.length === 4) {
-              setTimeout(submitSimPayment, 350);
-          }
-      }
-
-      function updatePinDisplay() {
-          const dots = document.querySelectorAll('.stk-dot');
-          dots.forEach((dot, idx) => {
-              if (idx < simPin.length) {
-                  dot.classList.add('filled');
-              } else {
-                  dot.classList.remove('filled');
-              }
-          });
-      }
-
-      function submitSimPayment() {
-          if (simPin.length < 4) return;
-          
-          // Trigger in-phone loading animation
-          const loader = document.getElementById('stkLoader');
-          document.getElementById('stkLoaderText').innerHTML = 'Processing PIN...';
-          loader.style.display = 'flex';
-          
-          setTimeout(() => {
-              fetch('mpesa_ajax.php?action=stk_simulate_callback', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                      phone: currentSimPhone,
-                      amount: currentSimAmount,
-                      reference: 'MP' + Math.random().toString(36).substring(2, 10).toUpperCase(),
-                      pin: simPin
-                  })
-              })
-              .then(res => res.json())
-              .then(data => {
-                  if (data.status === 'success') {
-                      document.getElementById('stkLoaderText').innerHTML = '✅ Payment Verified!';
-                      
-                      if (currentPaymentType === 'post_milk') {
-                          document.querySelector('#stkLoader p').textContent = 'Posting fee paid. Publishing your supply...';
-                          setTimeout(() => {
-                              closeMpesaSimulator();
-                              // Submit the post milk form
-                              const form = document.getElementById('postMilkForm');
-                              form.submit();
-                          }, 1800);
-                      } else {
-                          document.querySelector('#stkLoader p').textContent = 'Account activated successfully. Redirection to live markets...';
-                          setTimeout(() => {
-                              closeMpesaSimulator();
-                              window.location.href = 'dashboard.php?tab=markets';
-                          }, 1800);
-                      }
-                  } else {
-                      alert('Failed: ' + data.message);
-                      loader.style.display = 'none';
-                      simPin = "";
-                      updatePinDisplay();
-                  }
-              })
-              .catch(err => {
-                  alert('Error communicating with local server callback.');
-                  loader.style.display = 'none';
-                  simPin = "";
-                  updatePinDisplay();
-              });
-          }, 1500);
-      }
   </script>
 </body>
 </html>

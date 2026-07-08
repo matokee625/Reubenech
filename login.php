@@ -21,13 +21,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!empty($login_identity) && !empty($password)) {
         try {
             // Support login with either Email or Username
-            $stmt = $conn->prepare("SELECT id, username, password, role, status FROM users WHERE email = :login OR username = :login LIMIT 1");
-            $stmt->execute(['login' => $login_identity]);
+            $stmt = $conn->prepare("SELECT id, username, password, role, status, last_login FROM users WHERE email = :login_email OR username = :login_username LIMIT 1");
+            $stmt->execute(['login_email' => $login_identity, 'login_username' => $login_identity]);
             $user = $stmt->fetch(PDO::FETCH_OBJ);
 
             if ($user && password_verify($password, $user->password)) {
                 if ($user->status === 'suspended') {
-                    $error = "Your account has been suspended.";
+                    if (empty($user->last_login)) {
+                        $error = "Your account is pending administrator approval.";
+                    } else {
+                        $error = "Your account has been suspended.";
+                    }
                 } else if ($user->status === 'trash') {
                     $error = "Your account has been deleted.";
                 } else {
@@ -72,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LOGIN TO REUBENTECH MILK SOLUTIONS</title>
+    <title>LOGIN TO MILK SOLUTIONS</title>
     <meta name="description" content="Sign in to your Reubentech Hub account to access the milk production marketplace.">
     <link rel="icon" href="favicon.php" type="image/x-icon">
     <style>

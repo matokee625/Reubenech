@@ -11,13 +11,13 @@ try {
     $total_postings  = $conn->query("SELECT COUNT(*) FROM milk_postings")->fetchColumn();
     $active_postings = $conn->query("SELECT COUNT(*) FROM milk_postings WHERE status='active'")->fetchColumn();
     $total_volume    = $conn->query("SELECT SUM(liters) FROM milk_postings")->fetchColumn() ?? 0;
-    $total_revenue   = $conn->query("SELECT SUM(liters * asking_price) FROM milk_postings WHERE status='sold'")->fetchColumn() ?? 0;
+    $total_revenue   = $conn->query("SELECT SUM(price) FROM transactions WHERE status='completed'")->fetchColumn() ?? 0;
     $total_ads       = $conn->query("SELECT COUNT(*) FROM advertisements")->fetchColumn();
     $total_trans     = $conn->query("SELECT COUNT(*) FROM transactions")->fetchColumn();
     $pending_trans   = $conn->query("SELECT COUNT(*) FROM transactions WHERE status='pending'")->fetchColumn();
 
     // Recent users
-    $recent_users = $conn->query("SELECT username, email, role, status, registered_at FROM users ORDER BY registered_at DESC LIMIT 5")->fetchAll(PDO::FETCH_OBJ);
+    $recent_users = $conn->query("SELECT username, email, role, status, registered_at, last_login FROM users ORDER BY registered_at DESC LIMIT 5")->fetchAll(PDO::FETCH_OBJ);
 
     // Recent postings
     $recent_posts = $conn->query("SELECT mp.milk_type, mp.liters, mp.asking_price, mp.status, mp.posted_at, u.username
@@ -91,8 +91,8 @@ adminHeader('homepage', '');
     </div>
     <div class="stat-card green">
         <div class="stat-card-label">Revenue (Ksh)</div>
-        <div class="stat-card-value"><?= number_format($total_revenue) ?></div>
-        <div class="stat-card-sub">From sold postings</div>
+        <div class="stat-card-value">Ksh <?= number_format($total_revenue) ?></div>
+        <div class="stat-card-sub">Completed sales</div>
     </div>
     <div class="stat-card">
         <div class="stat-card-label">Transactions</div>
@@ -171,7 +171,11 @@ adminHeader('homepage', '');
                         <?php if($u->status==='active'): ?>
                             <span class="badge badge-active">Active</span>
                         <?php elseif($u->status==='suspended'): ?>
-                            <span class="badge badge-suspended">Suspended</span>
+                            <?php if(empty($u->last_login)): ?>
+                                <span class="badge badge-suspended" style="background:#fffde7; color:#854d0e; border:1px solid #fef08a; font-size:0.75rem; padding:0.15rem 0.35rem; border-radius:3px;">Pending</span>
+                            <?php else: ?>
+                                <span class="badge badge-suspended">Suspended</span>
+                            <?php endif; ?>
                         <?php else: ?>
                             <span class="badge badge-trash">Trash</span>
                         <?php endif; ?>
