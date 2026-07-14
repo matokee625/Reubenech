@@ -7,6 +7,7 @@ function adminHeader($activePage = 'homepage', $activeTab = '') {
     $pages = [
         'homepage' => ['label' => 'Dashboard',     'icon' => '🏠', 'href' => 'homepage.php'],
         'posts'    => ['label' => 'Posts',         'icon' => '📄', 'href' => 'posts.php'],
+        'advertisements' => ['label' => 'User Control', 'icon' => '👤', 'href' => 'advertisements.php'],
         'users'    => ['label' => 'Users',         'icon' => '👥', 'href' => 'users.php'],
         'transactions'=>['label'=> 'Transactions',  'icon' => '💳', 'href' => 'transactions.php'],
         'data'     => ['label' => 'Data Metrics',  'icon' => '📊', 'href' => 'data.php'],

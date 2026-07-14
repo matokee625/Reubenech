@@ -2,6 +2,7 @@
 require_once '../includes/auth.php';
 requireAdmin();
 require_once 'layout.php';
+require_once '../includes/ui_settings.php';
 
 // --- Filtering & Search ---
 $status_filter = $_GET['status'] ?? 'all';
@@ -38,7 +39,26 @@ try {
 // --- Handle Quick Actions ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
-    $uid    = (int)($_POST['user_id'] ?? 0);
+    
+    if ($action === 'edit_liters') {
+        $posting_id = (int)($_POST['posting_id'] ?? 0);
+        $new_liters = (float)($_POST['new_liters'] ?? 0);
+        $success = false;
+        if ($posting_id > 0 && $new_liters >= 0) {
+            $success = $conn->prepare("UPDATE milk_postings SET liters = ? WHERE id = ?")->execute([$new_liters, $posting_id]);
+        }
+        
+        if (isset($_POST['ajax']) && $_POST['ajax'] == 1) {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => $success]);
+            exit();
+        }
+
+        header("Location: users.php?status=$status_filter&search=" . urlencode($search_query));
+        exit();
+    }
+
+    $uid = (int)($_POST['user_id'] ?? 0);
     if ($uid > 0) {
         try {
             if ($action === 'suspend') {
@@ -197,6 +217,11 @@ adminHeader('users', 'User List');
         'sven@example.com'
     ];
     $i = 0; ?>
+<?php
+// Load dynamic labels once before the loop
+$volume_unit    = getVolumeUnit($conn);
+$currency_symbol = getCurrencySymbol($conn);
+?>
 <?php if (count($users) > 0): ?>
 <?php foreach ($users as $u): ?>
 
@@ -204,7 +229,7 @@ adminHeader('users', 'User List');
 // Get active milk postings for this user
 $active_milk_types = [];
 try {
-    $p_stmt = $conn->prepare("SELECT milk_type, SUM(liters) as total_liters FROM milk_postings WHERE user_id = ? AND status = 'active' GROUP BY milk_type");
+    $p_stmt = $conn->prepare("SELECT MAX(id) as posting_id, milk_type, SUM(liters) as total_liters FROM milk_postings WHERE user_id = ? AND status = 'active' GROUP BY milk_type");
     $p_stmt->execute([$u->id]);
     $active_milk_types = $p_stmt->fetchAll(PDO::FETCH_OBJ);
 } catch (PDOException $e) {}
@@ -217,9 +242,11 @@ try {
         <?php if (count($active_milk_types) > 0): ?>
             <div style="display:flex; flex-direction:column; gap:0.25rem;">
                 <?php foreach ($active_milk_types as $amt): ?>
-                    <span class="badge badge-active" style="background:#eff6ff; color:#2563eb; border:1px solid #bfdbfe; font-size:0.75rem; white-space:normal; display:inline-block; padding:0.25rem 0.5rem; border-radius:4px; font-weight:600;">
-                        <?= htmlspecialchars($amt->milk_type) ?>: <strong><?= number_format($amt->total_liters, 1) ?>L</strong>
-                    </span>
+                    <button type="button" class="badge badge-active" 
+                            onclick="openEditLitersModal(this, <?= $amt->posting_id ?>, '<?= htmlspecialchars(addslashes($amt->milk_type)) ?>', <?= $amt->total_liters ?>)" 
+                            style="background:#eff6ff; color:#2563eb; border:1px solid #bfdbfe; font-size:0.75rem; white-space:normal; display:inline-block; padding:0.25rem 0.5rem; border-radius:4px; font-weight:600; cursor:pointer; text-align:left;" title="Click to edit liters">
+                        <?= htmlspecialchars($amt->milk_type) ?>: <strong><?= number_format($amt->total_liters, 1) ?><?= htmlspecialchars($volume_unit) ?></strong> ✏️
+                    </button>
                 <?php endforeach; ?>
             </div>
         <?php else: ?>
@@ -325,6 +352,76 @@ try {
 document.getElementById('select-all')?.addEventListener('change', function() {
     document.querySelectorAll('input[name="uid[]"]').forEach(cb => cb.checked = this.checked);
 });
+
+let currentEditButton = null;
+const volumeUnit = <?= json_encode($volume_unit) ?>;
+
+function openEditLitersModal(btn, postingId, milkType, currentLiters) {
+    currentEditButton = btn;
+    document.getElementById('editPostingId').value = postingId;
+    document.getElementById('editLitersInput').value = currentLiters;
+    document.getElementById('editMilkType').textContent = milkType;
+    document.getElementById('editLitersModal').style.display = 'flex';
+}
+
+function submitEditLiters(e) {
+    e.preventDefault();
+    const postingId = document.getElementById('editPostingId').value;
+    const newLiters = document.getElementById('editLitersInput').value;
+    const milkType = document.getElementById('editMilkType').textContent;
+    
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = 'Saving...';
+    submitBtn.disabled = true;
+
+    fetch('users.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+            action: 'edit_liters',
+            posting_id: postingId,
+            new_liters: newLiters,
+            ajax: 1
+        })
+    })
+    .then(r => r.json())
+    .then(data => {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+        if(data.success) {
+            if (currentEditButton) {
+                currentEditButton.innerHTML = milkType + ': <strong>' + parseFloat(newLiters).toFixed(1) + volumeUnit + '</strong> ✏️';
+            }
+            document.getElementById('editLitersModal').style.display = 'none';
+        } else {
+            alert("Failed to save changes.");
+        }
+    })
+    .catch(err => {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+        alert("An error occurred.");
+    });
+}
 </script>
+
+<!-- Edit Liters Modal -->
+<div id="editLitersModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
+    <div style="background:white; padding:2rem; border-radius:8px; width:100%; max-width:400px; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+        <h3 style="margin-top:0; font-family:var(--font-heading);">Edit <span id="editMilkType"></span> Volume</h3>
+        <form onsubmit="submitEditLiters(event)">
+            <input type="hidden" id="editPostingId" value="">
+            <div style="margin-bottom:1rem;">
+                <label style="display:block; margin-bottom:0.5rem; font-weight:600;">New Volume (<?= htmlspecialchars($volume_unit) ?>)</label>
+                <input type="number" step="0.1" min="0" id="editLitersInput" required style="width:100%; padding:0.75rem; border:1px solid #cbd5e1; border-radius:4px; font-size:1rem;">
+            </div>
+            <div style="display:flex; justify-content:flex-end; gap:0.5rem; margin-top:1.5rem;">
+                <button type="button" onclick="document.getElementById('editLitersModal').style.display='none'" class="btn btn-outline" style="padding:0.5rem 1rem;">Cancel</button>
+                <button type="submit" class="btn btn-primary" style="padding:0.5rem 1.5rem;">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
 
 <?php adminFooter(); ?>

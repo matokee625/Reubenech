@@ -1,14 +1,40 @@
 <?php
-require_once '../includes/auth.php';
-require_once '../connection.php';
-requireLogin();
+<?php
+// Set JSON response header
+header('Content-Type: application/json');
+// Ensure request is POST
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
+    echo json_encode(['Success' => false, 'Message' => 'Method Not Allowed']);
+    exit();
+}
+// For payment initiation, we allow unauthenticated access but need a user identifier.
+// Expect 'user_id' in POST payload if session not available.
+$payload = $input ?? [];
+$userId = $_SESSION['user_id'] ?? $payload['user_id'] ?? null;
+if (!$userId) {
+    echo json_encode(['Success' => false, 'Message' => 'Initiation failed: Unauthorized access']);
+    exit();
+}
+?>
+?>
 $mpesaConfig = require '../config/mpesa.php';
 
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
 $input = json_decode(file_get_contents('php://input'), true);
-
+// Determine user identifier either from session or supplied payload
+$userId = $_SESSION['user_id'] ?? $input['user_id'] ?? null;
+if (!$userId) {
+    echo json_encode(['Success' => false, 'Message' => 'User identifier required']);
+    exit();
+}// Determine user identifier either from session or supplied payload
+$userId = $_SESSION['user_id'] ?? $input['user_id'] ?? null;
+if (!$userId) {
+    echo json_encode(['Success' => false, 'Message' => 'User identifier required']);
+    exit();
+}
 $phone = $input['phone'] ?? '';
 // format phone to 254...
 $phone = preg_replace('/^0/', '254', $phone);
@@ -87,7 +113,7 @@ if (isset($stk_result->ResponseCode) && $stk_result->ResponseCode == "0") {
     // Prompt sent successfully. Mark as pending (has_paid = 2) and record checkout request ID
     try {
         $upd = $conn->prepare('UPDATE users SET has_paid = 2, payment_ref = ? WHERE id = ?');
-        $upd->execute([$stk_result->CheckoutRequestID, $_SESSION['user_id']]);
+        $upd->execute([$stk_result->CheckoutRequestID, $userId]);
         
         echo json_encode([
             'Success' => true, 

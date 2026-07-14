@@ -5,81 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create an Account - REUBENTECH MILK SOLUTIONS</title>
     <link rel="icon" href="favicon.php" type="image/x-icon">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>
-        const supabaseUrl = 'https://hcnnimmosapaiwvthvta.supabase.co';
-        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhjbm5pbW1vc2FwYWl3dnRodnRhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwNzcxMDAsImV4cCI6MjA5ODY1MzEwMH0.BFVr1JKiQPxoOcEJryFItBJ89WxbeCmtCWBAKwv8cjg';
-        const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
-
-        // Handle local file protocol (file://) redirection to prevent downloads
-        document.addEventListener("DOMContentLoaded", function() {
-            var isFile = window.location.protocol === 'file:';
-            var isLiveServer = window.location.port !== '' && window.location.port !== '80' && window.location.port !== '443';
-
-            if (isFile || isLiveServer) {
-                // Rewrite Links to open through Apache local server
-                document.querySelectorAll("a").forEach(function(link) {
-                    var href = link.getAttribute("href");
-                    if (href && !href.startsWith("http://") && !href.startsWith("https://") && !href.startsWith("#") && !href.startsWith("javascript:")) {
-                        if (href.indexOf(".php") !== -1 || href === "login\.html" || href === "register.html") {
-                            var target = href;
-                            if (href.startsWith("../")) {
-                                target = href.substring(3);
-                            }
-                            link.setAttribute("href", "http://localhost/milkproject/" + target);
-                        }
-                    }
-                });
-            }
-
-            const registerForm = document.getElementById('register-form');
-            if (registerForm) {
-                registerForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    
-                    const errorBox = document.getElementById('error-box');
-                    const successBox = document.getElementById('success-box');
-                    
-                    errorBox.style.display = 'none';
-                    successBox.style.display = 'none';
-
-                    const username = document.getElementById('username').value;
-                    const email = document.getElementById('email').value.trim();
-                    
-                    // Simple email format validation
-                    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                    if (!emailPattern.test(email)) {
-                        errorBox.textContent = 'Invalid email address.';
-                        errorBox.style.display = 'block';
-                        return;
-                    }
-                    const password = document.getElementById('password').value;
-                    const confirmPassword = document.getElementById('confirm_password').value;
-                    
-                    if (password !== confirmPassword) {
-                        errorBox.textContent = 'Passwords do not match.';
-                        errorBox.style.display = 'block';
-                        return;
-                    }
-                    
-                    if (password.length < 8) {
-                        errorBox.textContent = 'Password must be at least 8 characters.';
-                        errorBox.style.display = 'block';
-                        return;
-                    }
-                    
-                    const submitBtn = registerForm.querySelector('button[type="submit"]');
-                    submitBtn.disabled = true;
-                    submitBtn.textContent = 'REGISTERING...';
-
-                    // Set standard POST attributes and submit
-                    registerForm.action = "register.php";
-                    registerForm.method = "POST";
-                    registerForm.submit();
-                });
-            }
-        });
-    </script>
+    <!-- Inline styles extracted from register.php -->
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
 
@@ -228,39 +154,6 @@
             border-radius: 4px;
         }
 
-        .extras-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-            margin-bottom: 2rem;
-            font-size: 0.85rem;
-            color: rgba(255, 255, 255, 0.85);
-        }
-
-        .remember-me {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            cursor: pointer;
-        }
-
-        .remember-me input {
-            cursor: pointer;
-            accent-color: var(--color-brand);
-        }
-
-        .forgot-link {
-            color: rgba(255, 255, 255, 0.85);
-            text-decoration: none;
-            transition: color 0.2s;
-        }
-
-        .forgot-link:hover {
-            color: white;
-            text-decoration: underline;
-        }
-
         .btn-login {
             width: 100%;
             padding: 0.9rem;
@@ -350,6 +243,18 @@
             background: rgba(255, 255, 255, 0.2);
         }
     </style>
+    <script>
+        // Handle local file protocol (file://) redirection to prevent downloads
+        document.addEventListener("DOMContentLoaded", function () {
+            var isFile = window.location.protocol === 'file:';
+            var isLiveServer = window.location.port !== '' && window.location.port !== '80' && window.location.port !== '443';
+
+            if (isFile || isLiveServer) {
+                // Immediately redirect to the PHP application so session checks apply
+                window.location.href = "http://localhost/milkproject/register.php";
+            }
+        });
+    </script>
 </head>
 <body>
 
@@ -376,7 +281,7 @@
             <div id="success-box" class="success-box"></div>
 
             <!-- Registration Form -->
-            <form id="register-form" style="width: 100%;">
+            <form id="register-form" method="POST" action="register.php" style="width: 100%;">
                 <!-- Username Input -->
                 <div class="input-container">
                     <span class="input-icon">
@@ -397,6 +302,32 @@
                         </svg>
                     </span>
                     <input type="email" id="email" name="email" placeholder="Email Address" required>
+                </div>
+
+                <!-- Phone Input -->
+                <div class="input-container">
+                    <span class="input-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                    </span>
+                    <input type="tel" id="phone" name="phone" placeholder="Phone Number (+254...)">
+                </div>
+
+                <!-- Milk Type & Volume Row -->
+                <div style="display: flex; gap: 1rem; margin-bottom: 1.25rem;">
+                    <!-- Milk Type -->
+                    <div class="input-container" style="flex: 1; margin-bottom: 0;">
+                        <select id="milk_type" name="milk_type" style="width: 100%; padding: 0.9rem 1rem; background: rgba(255, 255, 255, 0.95); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 4px; font-size: 0.95rem; color: #1e293b; outline: none; appearance: none;">
+                            <option value="" disabled selected>Select Milk Type...</option>
+                            <option value="Cow">Cow Milk</option>
+                            <option value="Goat">Goat Milk</option>
+                            <option value="Camel">Camel Milk</option>
+                        </select>
+                    </div>
+
+                    <!-- Initial Volume -->
+                    <div class="input-container" style="flex: 1; margin-bottom: 0;">
+                        <input type="number" id="liters" name="liters" placeholder="Initial Volume" step="0.1" min="0" style="width: 100%; padding: 0.9rem 1rem; background: rgba(255, 255, 255, 0.95); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 4px; font-size: 0.95rem; color: #1e293b; outline: none;">
+                    </div>
                 </div>
 
                 <!-- Password Input -->
@@ -424,18 +355,18 @@
                 </div>
 
                 <!-- Submit Button -->
-                <button type="submit" class="btn-login">REGISTER</button>
+                <button type="submit" id="submit-btn" class="btn-login">REGISTER</button>
             </form>
 
             <!-- Bottom Link -->
-            <div class="bottom-links">
-                Already have an account? <a href="login\.html">Sign in</a>
+            <div class="bottom-links" id="bottom-links">
+                Already have an account? <a href="login.html">Sign in</a>
             </div>
         </div>
     </div>
 
     <script>
-        window.togglePassword = function(fieldId) {
+        function togglePassword(fieldId) {
             var passwordField = document.getElementById(fieldId);
             var toggleText = passwordField.nextElementSibling;
             if (passwordField.type === "password") {
@@ -445,7 +376,7 @@
                 passwordField.type = "password";
                 toggleText.textContent = "Show";
             }
-        };
+        }
     </script>
 </body>
 </html>

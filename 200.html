@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reubentech Hub - Cooperative Homepage</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --font-heading: 'Outfit', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --color-primary: #059669;
+            --color-primary-hover: #047857;
+            --color-secondary: #0284c7;
+            --color-bg: #f8fafc;
+            --color-surface: #ffffff;
+            --color-text: #1e293b;
+            --color-text-muted: #64748b;
+            --color-border: #e2e8f0;
+            --radius-md: 12px;
+            --radius-lg: 20px;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--color-border);
+            padding: 1.25rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .logo {
+            font-family: var(--font-heading);
+            font-size: 1.5rem;
+            font-weight: 800;
+            text-decoration: none;
+            color: var(--color-primary);
+            letter-spacing: -0.025em;
+        }
+
+        .logo span {
+            color: #0f172a;
+        }
+
+        .nav-grid {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            color: var(--color-text-muted);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.875rem;
+            padding: 0.5rem 0.85rem;
+            border-radius: var(--radius-md);
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover {
+            color: var(--color-primary);
+            background-color: #f1f5f9;
+        }
+
+        .nav-btn-highlight {
+            background-color: var(--color-primary);
+            color: white !important;
+            box-shadow: 0 4px 8px rgba(5, 150, 105, 0.2);
+        }
+
+        .nav-btn-highlight:hover {
+            background-color: var(--color-primary-hover);
+        }
+
+        /* Hero */
+        .hero {
+            background: linear-gradient(135deg, rgba(240, 253, 244, 0.92) 0%, rgba(224, 242, 254, 0.88) 100%),
+                url('logomilk.avif') center/cover;
+            padding: 7rem 2rem;
+            text-align: center;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .hero-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-family: var(--font-heading);
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: #0f172a;
+            line-height: 1.15;
+            letter-spacing: -0.03em;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero h1 mark {
+            background: none;
+            color: var(--color-primary);
+        }
+
+        .hero p {
+            font-size: 1.15rem;
+            color: var(--color-text-muted);
+            margin-bottom: 2.5rem;
+            max-width: 650px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-large {
+            padding: 0.85rem 1.75rem;
+            border-radius: var(--radius-md);
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-green {
+            background-color: var(--color-primary);
+            color: white;
+            box-shadow: 0 6px 15px rgba(5, 150, 105, 0.25);
+        }
+
+        .btn-green:hover {
+            background-color: var(--color-primary-hover);
+            transform: translateY(-2px);
+        }
+
+        .btn-sky {
+            background-color: var(--color-secondary);
+            color: white;
+            box-shadow: 0 6px 15px rgba(2, 132, 199, 0.25);
+        }
+
+        .btn-sky:hover {
+            background-color: #0270a5;
+            transform: translateY(-2px);
+        }
+
+        .btn-white {
+            background-color: white;
+            color: var(--color-text);
+            border: 1px solid var(--color-border);
+        }
+
+        .btn-white:hover {
+            background-color: var(--color-bg);
+            transform: translateY(-2px);
+        }
+
+        /* Container Section */
+        .main-section {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 5rem 2rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2.5rem;
+            margin-top: 3rem;
+        }
+
+        .card {
+            background: var(--color-surface);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--color-border);
+            padding: 2.25rem;
+            box-shadow: var(--shadow-md);
+            transition: all 0.25s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+            border-color: rgba(5, 150, 105, 0.2);
+        }
+
+        .card-title {
+            font-family: var(--font-heading);
+            font-size: 1.35rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: #0f172a;
+        }
+
+        .card p {
+            color: var(--color-text-muted);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-header {
+            text-align: center;
+        }
+
+        .section-header h2 {
+            font-family: var(--font-heading);
+            font-size: 2.25rem;
+            font-weight: 800;
+            color: #0f172a;
+        }
+
+        .section-header p {
+            color: var(--color-text-muted);
+            margin-top: 0.5rem;
+        }
+
+        footer {
+            background: #0f172a;
+            color: #94a3b8;
+            text-align: center;
+            padding: 3rem 2rem;
+            border-top: 1px solid #1e293b;
+        }
+
+        /* MPesa Payment Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(6px);
+            z-index: 999;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-box {
+            background: #fff;
+            border-radius: var(--radius-lg);
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+            animation: modalIn 0.3s ease;
+        }
+        @keyframes modalIn {
+            from { opacity: 0; transform: translateY(20px) scale(0.97); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .modal-box h3 {
+            font-family: var(--font-heading);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 0.25rem;
+        }
+        .modal-box .modal-subtitle {
+            color: var(--color-text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 1.75rem;
+        }
+        .modal-box label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--color-text);
+            margin-bottom: 0.35rem;
+        }
+        .modal-box input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1.5px solid var(--color-border);
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            font-family: var(--font-body);
+            margin-bottom: 1.25rem;
+            transition: border-color 0.2s;
+            outline: none;
+        }
+        .modal-box input:focus {
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(5,150,105,0.12);
+        }
+        .modal-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+        }
+        .modal-actions button {
+            flex: 1;
+            padding: 0.8rem;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .modal-actions .btn-cancel {
+            background: #f1f5f9;
+            color: var(--color-text-muted);
+        }
+        .modal-actions .btn-cancel:hover { background: #e2e8f0; }
+        .modal-actions .btn-send {
+            background: #16a34a;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(22,163,74,0.3);
+        }
+        .modal-actions .btn-send:hover { background: #15803d; transform: translateY(-1px); }
+        .modal-actions .btn-send:disabled {
+            opacity: 0.6; cursor: not-allowed; transform: none;
+        }
+        .mpesa-badge {
+            display: inline-block;
+            background: #16a34a;
+            color: #fff;
+            font-size: 0.7rem;
+            font-weight: 800;
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            margin-right: 0.4rem;
+            vertical-align: middle;
+            letter-spacing: 0.04em;
+        }
+        #mpesa-status {
+            text-align: center;
+            padding: 0.75rem;
+            border-radius: var(--radius-md);
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-top: 1rem;
+            display: none;
+        }
+        #mpesa-status.success { display: block; background: #f0fdf4; color: #16a34a; }
+        #mpesa-status.error   { display: block; background: #fef2f2; color: #dc2626; }
+        #mpesa-status.loading { display: block; background: #f0f9ff; color: #0284c7; }
+    </style>
+
+</head>
+
+<body>
+
+    <!-- HEADER (9 Navigation Buttons total on this page) -->
+    <header>
+        <!-- Button 1: Logo Home -->
+        <a href="homepage.html" class="logo">🥛 Reubentech<span>Hub</span></a>
+
+        <nav class="nav-grid">
+            <!-- Button 2: Public Notice Board -->
+            <a href="index.html" class="nav-btn">Public Board</a>
+
+            <!-- Button 3: Producer Dashboard -->
+            <a href="member/dashboard.html" class="nav-btn">Producer Dashboard</a>
+
+            <!-- Button 4: Administrator Portal -->
+            <a href="admin/index.html" class="nav-btn">Admin Portal</a>
+
+            <!-- Button 5: Setup Diagnostics -->
+            <a href="admin/index.html" class="nav-btn">Setup Diagnostics</a>
+
+            <!-- Button 6: System Reports -->
+            <a href="admin/index.html" class="nav-btn">Coop Reports</a>
+
+            <!-- Button 7: API Documentation -->
+            <a href="admin/index.html" class="nav-btn">System APIs</a>
+
+            <!-- Button 8: Sign In -->
+            <a href="login.html" class="nav-btn">Sign In</a>
+
+            <!-- Button 9: Sign Up -->
+            <a href="register.html" class="nav-btn nav-btn-highlight">Register</a>
+                                                <a href="admin/users.html" class="nav-btn">Admin Users</a>
+                <a href="admin/transactions.html" class="nav-btn">Admin Transactions</a>
+                <a href="admin/reports.html" class="nav-btn">Admin Reports</a>
+                </nav>
+    </header>
+
+    <!-- HERO -->
+    <section class="hero">
+        <div class="hero-container">
+            <h1>Farm-Fresh Dairy cooperative <mark>Digital Marketplace</mark></h1>
+            <p>Welcome to the cooperative network dashboard. Access real-time milk postings, sell supply directly to
+                processing plants, publish advertisements, and review financial ledger invoices.</p>
+            <div class="hero-action-buttons">
+                <!-- Button 10: Sign In (Hero Secondary Action) -->
+                <a href="login.html" class="btn-large btn-green">Access Dashboard Portal</a>
+                <!-- Button 11: Register (Hero Primary Action) -->
+                <a href="register.html" class="btn-large btn-white">Create Producer Account</a>
+                <!-- Button 12: Pay with MPesa -->
+                <button id="mpesa-pay-btn" class="btn-large btn-sky">Pay with MPesa</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- CONTENT -->
+    <main class="main-section">
+        <div class="section-header">
+            <h2>Digital Cooperative Workspaces</h2>
+            <p>Direct routes to individual platform components and cooperative subsystems.</p>
+        </div>
+
+        <div class="grid">
+            <!-- Card 1 -->
+            <div class="card">
+                <h3 class="card-title">John Doe – Milk Supplier</h3>
+                <p>Register as a member to list cow, goat, or camel milk liters, asking price rates, and publish
+                    directly to local processors.</p>
+                <a href="member/dashboard.html" class="btn-large btn-white"
+                    style="font-size:0.85rem; padding:0.5rem 1rem;">Post Supply</a>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="card">
+                <h3 class="card-title">Jane Smith – Commercial Buyer</h3>
+                <p>Processors like Brookside Plant, New KCC Cooperative, and Githunguri Dairy purchase fresh stock daily
+                    from registered producers.</p>
+                <a href="member/dashboard.html" class="btn-large btn-white"
+                    style="font-size:0.85rem; padding:0.5rem 1rem;">Explore Buyers</a>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="card">
+                <h3 class="card-title">Peter Karanja – Reports Analyst</h3>
+                <p>Review gross transaction volumes, estimated commission ledger reports, sales analytics, and download
+                    SQL ledger backups.</p>
+                <a href="admin/index.html" class="btn-large btn-white"
+                    style="font-size:0.85rem; padding:0.5rem 1rem;">View Reports</a>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Reubentech Hub — Dairy Cooperative System. All rights reserved.</p>
+    </footer>
+
+    <!-- MPesa Payment Modal -->
+    <div id="mpesa-modal" class="modal-overlay">
+        <div class="modal-box">
+  <h3><span class="mpesa-badge">M-PESA</span> Pay Now</h3>
+                    <p class="modal-subtitle">Enter your phone number to receive the MPesa payment prompt.<br>Account: <strong>REUBENTECH MILK SOLUTIONS</strong></p>
+                    <form id="mpesa-form">
+                        <label for="mpesa-phone">Phone Number</label>
+                        <input type="tel" id="mpesa-phone" name="phone" placeholder="e.g. 0712345678" required>
+                        <label for="mpesa-amount">Amount (KES)</label>
+                        <input type="number" id="mpesa-amount" name="amount" placeholder="e.g. 500" min="1" required>
+                        <input type="hidden" id="mpesa-product" name="product_id" value="">
+                        <div class="modal-actions">
+                            <button type="button" class="btn-cancel" id="mpesa-cancel">Cancel</button>
+                            <button type="submit" class="btn-send" id="mpesa-submit">Send Prompt</button>
+                        </div>
+                        <div id="mpesa-status"></div>
+                    </form>
+        </div>
+    </div>
+
+<script>
+(function() {
+    const modal   = document.getElementById('mpesa-modal');
+    const form    = document.getElementById('mpesa-form');
+    const phoneIn = document.getElementById('mpesa-phone');
+    const amtIn   = document.getElementById('mpesa-amount');
+    const status  = document.getElementById('mpesa-status');
+    const submitBtn = document.getElementById('mpesa-submit');
+
+    // Open modal
+    // Desktop modal open listener removed – mobile-only handling is below
+
+    // Close modal
+    document.getElementById('mpesa-cancel').addEventListener('click', () => {
+        modal.classList.remove('active');
+    });
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.classList.remove('active');
+    });
+
+    // Open modal – only on mobile devices
+    if (typeof document !== 'undefined') {
+        const mpesaBtn = document.getElementById('mpesa-pay-btn');
+        if (mpesaBtn) {
+            mpesaBtn.addEventListener('click', () => {
+                // Detect mobile user agents
+                const isMobile = /Mobi|Android|iPhone|iPad|iPod|Phone|Mobile/i.test(navigator.userAgent);
+                if (!isMobile) {
+                    // On desktop, just show a brief notice instead of the modal
+                    // No alert on desktop
+                    return;
+                }
+                modal.classList.add('active');
+                status.className = '';
+                status.textContent = '';
+                status.style.display = 'none';
+                phoneIn.value = '';
+                amtIn.value = '';
+            });
+            // Desktop modal listener removed – mobile-only handling is defined later in the script    
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const phone = phoneIn.value;
+                const amount = amtIn.value;
+                status.className = 'loading';
+                status.textContent = 'Processing...';
+                status.style.display = 'block';
+
+                fetch('mpesa_initiate.php', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    body: `phone=${encodeURIComponent(phone)}&amount=${amount}`
+                })
+                .then(r => r.json().then(data => ({ok: r.ok, data})))
+                .then(res => {
+                    if (res.ok) {
+                        status.className = 'success';
+                        status.textContent = 'Prompt sent – check your phone for the MPesa PIN entry.';
+                    } else {
+                        status.className = 'error';
+                        status.textContent = res.data.error || 'Failed to send prompt';
+                    }
+                })
+                .catch(() => {
+                    status.className = 'error';
+                    status.textContent = 'Network error';
+                })
+                .finally(() => {
+                    setTimeout(() => { status.style.display = 'none'; }, 3000);
+                });
+            });
+        }
+    }
+})();
+</script>
+
+<script src="js/loading.js" defer></script>
+</body>
+
+</html>

@@ -13,6 +13,9 @@ $success = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username'] ?? '');
     $email = trim($_POST['email'] ?? '');
+    $phone = trim($_POST['phone'] ?? '');
+    $milk_type = trim($_POST['milk_type'] ?? '');
+    $liters = trim($_POST['liters'] ?? '');
     $password = $_POST['password'] ?? '';
     $confirm_password = $_POST['confirm_password'] ?? '';
 
@@ -33,14 +36,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $conn->beginTransaction();
 
                     // Insert user
-                    $insert = $conn->prepare("INSERT INTO users (username, email, password, role, status, has_paid) VALUES (?, ?, ?, 'member', 'suspended', 0)");
-                    $insert->execute([$username, $email, $hash]);
+                    $insert = $conn->prepare("INSERT INTO users (username, email, phone, password, role, status, has_paid) VALUES (?, ?, ?, ?, 'member', 'suspended', 0)");
+                    $insert->execute([$username, $email, $phone, $hash]);
                     
                     $new_user_id = $conn->lastInsertId();
 
-                    // Auto-seed active milk supply posting so they have supply ready to sell
-                    $post_stmt = $conn->prepare("INSERT INTO milk_postings (user_id, liters, milk_type, asking_price, status) VALUES (?, 150.00, 'Cow', 40.00, 'active')");
-                    $post_stmt->execute([$new_user_id]);
+                    // Optional: Auto-seed active milk supply posting if user provided initial supply info
+                    if (!empty($milk_type) && !empty($liters) && is_numeric($liters) && $liters > 0) {
+                        $post_stmt = $conn->prepare("INSERT INTO milk_postings (user_id, liters, milk_type, asking_price, status) VALUES (?, ?, ?, 40.00, 'active')");
+                        $post_stmt->execute([$new_user_id, $liters, $milk_type]);
+                    }
 
                     $conn->commit();
 
@@ -215,6 +220,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             background: rgba(255, 255, 255, 0.8);
             padding: 0.2rem 0.5rem;
             border-radius: 4px;
+        }
+
+        .error-box {
+            width: 100%;
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            color: #fca5a5;
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            margin-bottom: 1.25rem;
+            font-size: 0.875rem;
+            text-align: center;
+        }
+
+        .success-box {
+            width: 100%;
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: #a7f3d0;
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            margin-bottom: 1.25rem;
+            font-size: 0.875rem;
+            text-align: center;
         }
 
         .extras-row {
@@ -419,6 +448,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </svg>
                     </span>
                     <input type="email" id="email" name="email" placeholder="Email Address" value="<?= htmlspecialchars($email ?? '') ?>" required>
+                </div>
+
+                <!-- Phone Input -->
+                <div class="input-container">
+                    <span class="input-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                    </span>
+                    <input type="tel" id="phone" name="phone" placeholder="Phone Number (+254...)" value="<?= htmlspecialchars($phone ?? '') ?>">
+                </div>
+
+                <!-- Milk Type & Volume Row -->
+                <div style="display: flex; gap: 1rem; margin-bottom: 1.25rem;">
+                    <!-- Milk Type -->
+                    <div class="input-container" style="flex: 1; margin-bottom: 0;">
+                        <select id="milk_type" name="milk_type" style="width: 100%; padding: 0.9rem 1rem; background: rgba(255, 255, 255, 0.95); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 4px; font-size: 0.95rem; color: #1e293b; outline: none; appearance: none;">
+                            <option value="" disabled selected>Select Milk Type...</option>
+                            <option value="Cow" <?= (isset($milk_type) && $milk_type === 'Cow') ? 'selected' : '' ?>>Cow Milk</option>
+                            <option value="Goat" <?= (isset($milk_type) && $milk_type === 'Goat') ? 'selected' : '' ?>>Goat Milk</option>
+                            <option value="Camel" <?= (isset($milk_type) && $milk_type === 'Camel') ? 'selected' : '' ?>>Camel Milk</option>
+                        </select>
+                    </div>
+
+                    <!-- Initial Volume -->
+                    <div class="input-container" style="flex: 1; margin-bottom: 0;">
+                        <input type="number" id="liters" name="liters" placeholder="Initial Volume" value="<?= htmlspecialchars($liters ?? '') ?>" step="0.1" min="0" style="width: 100%; padding: 0.9rem 1rem; background: rgba(255, 255, 255, 0.95); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 4px; font-size: 0.95rem; color: #1e293b; outline: none;">
+                    </div>
                 </div>
 
                 <!-- Password Input -->

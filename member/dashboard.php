@@ -1,5 +1,6 @@
 <?php
 require_once '../includes/auth.php';
+require_once '../includes/ui_settings.php';
 requireLogin();
 
 // Redirect admin to admin dashboard
@@ -118,9 +119,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     if ($_POST['action'] === 'post_ad') {
         $title = trim($_POST['title']);
         $description = trim($_POST['description']);
+        $phone = trim($_POST['phone'] ?? '');
         $image_url = null;
 
-        if (!empty($title) && !empty($description)) {
+        if (!empty($title) && !empty($description) && preg_match('/^\+[0-9]{7,15}$/', $phone)) {
+            
+            // Update the user's phone in the database if it's different/new
+            try {
+                $upd_stmt = $conn->prepare("UPDATE users SET phone = ? WHERE id = ?");
+                $upd_stmt->execute([$phone, $_SESSION['user_id']]);
+                // Update local session/profile object just in case it's used later
+                if(isset($user_profile)) {
+                    $user_profile->phone = $phone;
+                }
+            } catch (PDOException $e) { /* ignore error if phone update fails */ }
+
             // Handle image upload if present
             if (isset($_FILES['ad_image']) && $_FILES['ad_image']['error'] === UPLOAD_ERR_OK) {
                 $file_tmp = $_FILES['ad_image']['tmp_name'];
@@ -147,7 +160,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 $error = "Error posting ad: " . $e->getMessage();
             }
         } else {
-            $error = "Title and Description are required.";
+            if (empty($phone) || !preg_match('/^\+[0-9]{7,15}$/', $phone)) {
+                $error = "A valid phone number with country code is required (e.g. +254...).";
+            } else {
+                $error = "Title and Description are required.";
+            }
         }
     }
 
@@ -165,8 +182,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             }
         }
     }
+    
+    // 5. Delete Advertisement
+    if ($_POST['action'] === 'delete_ad') {
+        $ad_id = intval($_POST['ad_id'] ?? 0);
+        if ($ad_id > 0) {
+            try {
+                $stmt = $conn->prepare("DELETE FROM advertisements WHERE id = ? AND user_id = ?");
+                $stmt->execute([$ad_id, $_SESSION['user_id']]);
+                // Redirect to ads tab to refresh the list
+                header('Location: dashboard.php?tab=ads');
+                exit();
+            } catch (PDOException $e) {
+                $error = "Error deleting advertisement: " . $e->getMessage();
+            }
+        }
+    }
 
-    // 5. Submit Payment Verification Reference
+    // 6. Submit Payment Verification Reference
     if ($_POST['action'] === 'submit_payment') {
         $ref = strtoupper(trim($_POST['payment_ref'] ?? ''));
         $amount = floatval($_POST['payment_amount'] ?? 0);
@@ -354,6 +387,10 @@ try {
     $sold_earnings = 0;
     $sold_volume = 0;
 }
+
+// Load dynamic UI labels from settings table
+$volume_unit     = getVolumeUnit($conn);
+$currency_symbol = getCurrencySymbol($conn);
 
 // Commercial buyers list
 $markets = [
@@ -851,15 +888,15 @@ $markets = [
               <div class="stats-grid" style="margin-top:1.5rem;">
                 <div class="stat-card">
                   <div class="stat-card-label">Active Supply Volume</div>
-                  <div class="stat-card-value"><?= number_format($total_volume) ?> <span class="text-sm text-muted">Liters</span></div>
+                  <div class="stat-card-value"><?= number_format($total_volume) ?> <span class="text-sm text-muted"><?= htmlspecialchars($volume_unit) ?></span></div>
                 </div>
                 <div class="stat-card">
                   <div class="stat-card-label">Avg Asking Price</div>
-                  <div class="stat-card-value"><span class="text-sm text-muted">Ksh</span> <?= number_format($avg_price, 2) ?></div>
+                  <div class="stat-card-value"><span class="text-sm text-muted"><?= htmlspecialchars($currency_symbol) ?></span> <?= number_format($avg_price, 2) ?></div>
                 </div>
                 <div class="stat-card">
                   <div class="stat-card-label">Total Verified Earnings</div>
-                  <div class="stat-card-value"><span class="text-sm text-muted">Ksh</span> <?= number_format($sold_earnings) ?></div>
+                  <div class="stat-card-value"><span class="text-sm text-muted"><?= htmlspecialchars($currency_symbol) ?></span> <?= number_format($sold_earnings) ?></div>
                 </div>
               </div>
 
@@ -923,7 +960,7 @@ $markets = [
                         <tr>
                           <th>Posting ID</th>
                           <th>Milk Type</th>
-                          <th>Volume (Liters)</th>
+                          <th>Volume (<?= htmlspecialchars($volume_unit) ?>)</th>
                           <th>Your Asking Price</th>
                           <th>Status</th>
                         </tr>
@@ -933,8 +970,8 @@ $markets = [
                         <tr>
                           <td>#<?= str_pad($p->id, 5, '0', STR_PAD_LEFT) ?></td>
                           <td><?= htmlspecialchars($p->milk_type) ?></td>
-                          <td class="font-semibold"><?= htmlspecialchars($p->liters) ?> L</td>
-                          <td>Ksh <?= htmlspecialchars($p->asking_price) ?> / L</td>
+                          <td class="font-semibold"><?= htmlspecialchars($p->liters) ?> <?= htmlspecialchars($volume_unit) ?></td>
+                          <td><?= htmlspecialchars($currency_symbol) ?> <?= htmlspecialchars($p->asking_price) ?> / <?= htmlspecialchars($volume_unit) ?></td>
                           <td><span class="badge badge-info">Active</span></td>
                         </tr>
                         <?php endforeach; ?>
@@ -972,7 +1009,7 @@ $markets = [
                       <?php endif; ?>
                     </div>
                     <div class="buyer-action" style="text-align: right;">
-                      <div class="badge badge-success" style="font-size:0.9rem; padding:0.4rem 0.8rem; font-weight:bold;">Buying Rate: Ksh <?= number_format($market['rate'], 2) ?> / Litre</div>
+                      <div class="badge badge-success" style="font-size:0.9rem; padding:0.4rem 0.8rem; font-weight:bold;">Buying Rate: <?= htmlspecialchars($currency_symbol) ?> <?= number_format($market['rate'], 2) ?> / <?= htmlspecialchars($volume_unit) ?></div>
                       <div style="margin-top: 0.75rem;">
                         <?php if (($user_profile->has_paid ?? 0) == 1): ?>
                           <button class="btn btn-brand" onclick="openSellModal('<?= $market['username'] ?>', '<?= $market['name'] ?>', <?= $market['rate'] ?>)" style="padding: 0.4rem 1rem; font-size: 0.8rem;">🤝 Sell Milk to Buyer</button>
@@ -1121,8 +1158,8 @@ $markets = [
                             <td>#<?= str_pad($p->id, 5, '0', STR_PAD_LEFT) ?></td>
                             <td><?= date('M d Y, g:i A', strtotime($p->posted_at)) ?></td>
                             <td><?= htmlspecialchars($p->milk_type) ?></td>
-                            <td class="font-semibold"><?= htmlspecialchars($p->liters) ?> L</td>
-                            <td>Ksh <?= htmlspecialchars($p->asking_price) ?>/L</td>
+                            <td class="font-semibold"><?= htmlspecialchars($p->liters) ?> <?= htmlspecialchars($volume_unit) ?></td>
+                            <td><?= htmlspecialchars($currency_symbol) ?> <?= htmlspecialchars($p->asking_price) ?>/<?= htmlspecialchars($volume_unit) ?></td>
                             <td>
                                 <?php if($p->status === 'active'): ?>
                                     <span class="badge badge-info">Active</span>
@@ -1179,8 +1216,8 @@ $markets = [
                             <td>#<?= str_pad($tx->id, 5, '0', STR_PAD_LEFT) ?></td>
                             <td><strong><?= ucwords(str_replace('_', ' ', $tx->buyer_name)) ?></strong></td>
                             <td><?= htmlspecialchars($tx->milk_type) ?> Milk</td>
-                            <td><?= htmlspecialchars($tx->volume) ?> L</td>
-                            <td class="font-semibold">Ksh <?= number_format($tx->price, 2) ?></td>
+                            <td><?= htmlspecialchars($tx->volume) ?> <?= htmlspecialchars($volume_unit) ?></td>
+                            <td class="font-semibold"><?= htmlspecialchars($currency_symbol) ?> <?= number_format($tx->price, 2) ?></td>
                             <td>
                                 <?php if($tx->status === 'completed'): ?>
                                     <span class="badge badge-success">✅ Completed</span>
@@ -1206,26 +1243,36 @@ $markets = [
               <div class="dashboard-grid" style="margin-top: 1.5rem;">
                   <!-- Left: Posted Ads -->
                   <div class="card">
-                      <div class="card-header"><h3>Your Published Advertisements</h3></div>
+                      <div class="card-header"><h3>Public Community Advertisements</h3></div>
                       <div style="padding: 1.5rem; max-height: 500px; overflow-y: auto;" class="space-y-4">
-                          <?php if(count($my_ads) > 0): ?>
-                              <?php foreach($my_ads as $ad): ?>
-                              <div style="border: 1px solid var(--border); padding: 1rem; border-radius: var(--radius-md); display: flex; gap: 1rem;">
-                                  <?php if($ad->image_url): ?>
-                                      <img src="../<?= htmlspecialchars($ad->image_url) ?>" style="width: 80px; height: 80px; object-fit: cover; border-radius: var(--radius-md);" alt="Ad Image">
-                                  <?php else: ?>
-                                      <div style="width: 80px; height: 80px; background:#f1f5f9; border-radius: var(--radius-md); display:flex; align-items:center; justify-content:center; color:#94a3b8; font-size:1.5rem;">🖼️</div>
-                                  <?php endif; ?>
-                                  <div>
-                                      <h4 class="font-bold"><?= htmlspecialchars($ad->title) ?></h4>
-                                      <p class="text-sm text-muted" style="margin-top:0.25rem;"><?= nl2br(htmlspecialchars($ad->description)) ?></p>
-                                      <span class="text-xs text-muted" style="display:block; margin-top:0.5rem;">Posted on: <?= date('d M Y', strtotime($ad->created_at)) ?></span>
-                                  </div>
-                              </div>
-                              <?php endforeach; ?>
-                          <?php else: ?>
-                              <p class="text-muted text-center" style="padding: 2rem 0;">You have not published any advertisements yet.</p>
-                          <?php endif; ?>
+                               <?php
+                                   // Fetch all advertisements for public view (no contact info)
+                                   $public_ads = $conn->query("SELECT a.*, u.username FROM advertisements a JOIN users u ON a.user_id = u.id ORDER BY a.created_at DESC")->fetchAll();
+                               ?>
+                               <?php if(count($public_ads) > 0): ?>
+                                   <?php foreach($public_ads as $ad): ?>
+                                   <div style="border: 1px solid var(--border); padding: 1rem; border-radius: var(--radius-md); display: flex; gap: 1rem;">
+                                       <?php if($ad->image_url): ?>
+                                           <img src="../<?php echo htmlspecialchars($ad->image_url); ?>" style="width: 80px; height: 80px; object-fit: cover; border-radius: var(--radius-md);" alt="Ad Image">
+                                       <?php else: ?>
+                                           <div style="width: 80px; height: 80px; background:#f1f5f9; border-radius: var(--radius-md); display:flex; align-items:center; justify-content:center; color:#94a3b8; font-size:1.5rem;">🖼️</div>
+                                       <?php endif; ?>
+                                       <div>
+                                           <h4 class="font-bold"><?php echo htmlspecialchars($ad->title); ?></h4>
+                                           <p class="text-sm text-muted" style="margin-top:0.25rem;"><?php echo nl2br(htmlspecialchars($ad->description)); ?></p>
+                                           <span class="text-xs text-muted" style="display:block; margin-top:0.5rem;">Posted by: <?php echo htmlspecialchars($ad->username); ?> on <?php echo date('d M Y', strtotime($ad->created_at)); ?></span>
+                                           <?php if($ad->user_id == $_SESSION['user_id']): ?>
+                        <form method="POST" action="dashboard.php?tab=ads" style="margin-top:0.5rem;" onsubmit="return confirm('Delete this advertisement?');">
+                            <input type="hidden" name="action" value="delete_ad">
+                            <input type="hidden" name="ad_id" value="<?php echo $ad->id; ?>">
+                            <button type="submit" class="btn btn-outline" style="background:#fca5a5; color:#b91c1b; border-color:#b91c1b;">Delete</button>
+                        </form>
+<?php endif; ?>
+                                   </div>
+                                   <?php endforeach; ?>
+                               <?php else: ?>
+                                   <p class="text-muted text-center" style="padding: 2rem 0;">No community advertisements available.</p>
+                               <?php endif; ?>
                       </div>
                   </div>
 
@@ -1241,6 +1288,11 @@ $markets = [
                           <div class="form-group" style="margin-bottom:1rem;">
                               <label class="form-label" for="ad_desc">Description / Notice Details</label>
                               <textarea class="form-input" id="ad_desc" name="description" rows="4" placeholder="Describe the item, pricing, and contact information..." style="resize:vertical; font-family:inherit;" required></textarea>
+                          </div>
+                          <div class="form-group" style="margin-bottom:1rem;">
+                              <label class="form-label" for="ad_phone">Contact Phone Number</label>
+                              <input class="form-input" type="tel" id="ad_phone" name="phone" value="<?= htmlspecialchars($user_profile->phone ?? '') ?>" required pattern="^\+[0-9]{7,15}$" title="Phone number must start with a + country code followed by numbers only (e.g., +254712345678)" placeholder="e.g. +2547...">
+                              <small style="color:var(--text-muted); display:block; margin-top:0.25rem;">Must include country code (e.g., +254). This will be shown on your ad.</small>
                           </div>
                           <div class="form-group" style="margin-bottom:1rem;">
                               <label class="form-label" for="ad_image">Attachment Image <small style="color:var(--text-muted)">(optional)</small></label>

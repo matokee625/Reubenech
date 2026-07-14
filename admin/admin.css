@@ -680,3 +680,315 @@ input:checked + .toggle-slider {
 input:checked + .toggle-slider:before {
     transform: translateX(20px);
 }
+
+/* ============================
+   USER MANAGEMENT PAGE
+   ============================ */
+
+/* --- Page Header Enhancement --- */
+.page-header h1 {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* --- Search Input in Toolbar --- */
+.table-toolbar input[type="text"] {
+    padding: 0.5rem 0.85rem;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.8125rem;
+    font-family: inherit;
+    color: #1e293b;
+    background: #f8fafc;
+    outline: none;
+    width: 220px;
+    transition: all 0.25s ease;
+}
+
+.table-toolbar input[type="text"]:focus {
+    border-color: #2563eb;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12), 0 1px 2px rgba(0,0,0,0.04);
+}
+
+.table-toolbar input[type="text"]::placeholder {
+    color: #94a3b8;
+    font-weight: 400;
+}
+
+/* --- Bulk Action Buttons --- */
+.table-toolbar .btn {
+    border-radius: 8px;
+    font-size: 0.8rem;
+    padding: 0.5rem 1rem;
+    letter-spacing: 0.01em;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+    transition: all 0.2s ease;
+}
+
+.table-toolbar .btn:active {
+    transform: scale(0.97);
+}
+
+.table-toolbar .btn-danger {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    border: 1px solid #dc2626;
+}
+.table-toolbar .btn-danger:hover {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+    transform: translateY(-1px);
+}
+
+.table-toolbar .btn-success {
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    border: 1px solid #16a34a;
+}
+.table-toolbar .btn-success:hover {
+    background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
+    transform: translateY(-1px);
+}
+
+/* --- Row-Level Action Buttons --- */
+.btn-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.75rem;
+    font-weight: 600;
+    font-family: inherit;
+    letter-spacing: 0.02em;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.btn-action.btn-danger {
+    background: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+}
+.btn-action.btn-danger:hover {
+    background: #dc2626;
+    color: #fff;
+    border-color: #dc2626;
+    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.25);
+    transform: translateY(-1px);
+}
+
+.btn-action.btn-success {
+    background: #f0fdf4;
+    color: #16a34a;
+    border: 1px solid #bbf7d0;
+}
+.btn-action.btn-success:hover {
+    background: #16a34a;
+    color: #fff;
+    border-color: #16a34a;
+    box-shadow: 0 2px 8px rgba(22, 163, 74, 0.25);
+    transform: translateY(-1px);
+}
+
+.btn-action:active {
+    transform: scale(0.95) translateY(0);
+}
+
+/* --- Status Badges --- */
+.badge-success {
+    background: #dcfce7;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+}
+
+.badge-warning {
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fde68a;
+}
+
+.badge-danger {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+.badge-info {
+    background: #e0f2fe;
+    color: #075985;
+    border: 1px solid #bae6fd;
+}
+
+/* --- Custom Checkbox Styling --- */
+.admin-table input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: #2563eb;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: transform 0.15s ease;
+}
+
+.admin-table input[type="checkbox"]:hover {
+    transform: scale(1.15);
+}
+
+.admin-table thead input[type="checkbox"] {
+    width: 17px;
+    height: 17px;
+}
+
+/* --- Table Row Hover & Selection --- */
+.admin-table tbody tr {
+    transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.admin-table tbody tr:hover {
+    background: #eff6ff !important;
+}
+
+.admin-table tbody tr:hover td {
+    color: #1e293b;
+}
+
+/* Highlight rows with checked checkbox */
+.admin-table tbody tr:has(input[type="checkbox"]:checked) {
+    background: #eff6ff;
+    box-shadow: inset 3px 0 0 #2563eb;
+}
+
+.admin-table tbody tr:has(input[type="checkbox"]:checked) td {
+    color: #1e293b;
+}
+
+/* --- User ID Column Styling --- */
+.admin-table td:nth-child(2) {
+    font-weight: 600;
+    color: #64748b;
+    font-family: 'SF Mono', 'Cascadia Code', 'Consolas', monospace;
+    font-size: 0.8rem;
+}
+
+/* --- Table Striping (subtle) --- */
+.admin-table tbody tr:nth-child(even) {
+    background-color: #fafbfc;
+}
+
+/* --- Empty State Enhancement --- */
+.admin-table tbody tr td[colspan] {
+    color: #94a3b8;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+/* --- Error Message Enhancement --- */
+.table-card > .error-msg {
+    margin: 1rem 1.25rem;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    animation: slideDown 0.3s ease;
+}
+
+/* --- Success Flash (for redirect-back scenarios) --- */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInRow {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.admin-table tbody tr {
+    animation: fadeInRow 0.3s ease backwards;
+}
+
+.admin-table tbody tr:nth-child(1) { animation-delay: 0.03s; }
+.admin-table tbody tr:nth-child(2) { animation-delay: 0.06s; }
+.admin-table tbody tr:nth-child(3) { animation-delay: 0.09s; }
+.admin-table tbody tr:nth-child(4) { animation-delay: 0.12s; }
+.admin-table tbody tr:nth-child(5) { animation-delay: 0.15s; }
+.admin-table tbody tr:nth-child(6) { animation-delay: 0.18s; }
+.admin-table tbody tr:nth-child(7) { animation-delay: 0.21s; }
+.admin-table tbody tr:nth-child(8) { animation-delay: 0.24s; }
+.admin-table tbody tr:nth-child(9) { animation-delay: 0.27s; }
+.admin-table tbody tr:nth-child(10) { animation-delay: 0.30s; }
+
+/* --- Responsive Adjustments for User Management --- */
+@media (max-width: 768px) {
+    .table-toolbar .filters {
+        flex-direction: column;
+        align-items: stretch !important;
+    }
+
+    .table-toolbar input[type="text"] {
+        width: 100%;
+    }
+
+    .table-toolbar .filters > div:last-child {
+        margin-left: 0 !important;
+        justify-content: stretch;
+    }
+
+    .table-toolbar .filters > div:last-child .btn {
+        flex: 1;
+        justify-content: center;
+    }
+
+    .btn-action {
+        padding: 0.3rem 0.5rem;
+        font-size: 0.7rem;
+    }
+
+    .admin-table td:nth-child(4),
+    .admin-table th:nth-child(4) {
+        display: none;
+    }
+
+    .admin-table td:nth-child(5),
+    .admin-table th:nth-child(5) {
+        display: none;
+    }
+}
+
+/* --- Trashed Row visual styling --- */
+.admin-table tbody tr.row-trashed {
+    background-color: #faf7f7;
+}
+.admin-table tbody tr.row-trashed td {
+    color: #94a3b8;
+}
+.admin-table tbody tr.row-trashed strong {
+    color: #94a3b8;
+    text-decoration: line-through;
+}
+.admin-table tbody tr.row-trashed:hover {
+    background: #fff5f5 !important;
+}
+.admin-table tbody tr.row-trashed:hover td {
+    color: #b91c1c;
+}
+.admin-table tbody tr.row-trashed .badge {
+    opacity: 0.85;
+}
+

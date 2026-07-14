@@ -1,46 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reubentech Hub - Cooperative Homepage</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
+    <title>Milk Solutions - Cooperative Marketplace</title>
+    <meta name="description" content="Join the Reubentech Hub dairy cooperative. Post milk for sale, find buyers, and manage your dairy production.">
+    <link rel="icon" href="favicon.php" type="image/x-icon">
+    <!-- Load Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/database.js"></script>
     <style>
+        /* Extracted styles from index.php */
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+
         :root {
-            --font-heading: 'Outfit', sans-serif;
-            --font-body: 'Inter', sans-serif;
             --color-primary: #059669;
             --color-primary-hover: #047857;
-            --color-secondary: #0284c7;
             --color-bg: #f8fafc;
-            --color-surface: #ffffff;
-            --color-text: #1e293b;
+            --color-card: #ffffff;
+            --color-text: #334155;
             --color-text-muted: #64748b;
             --color-border: #e2e8f0;
-            --radius-md: 12px;
-            --radius-lg: 20px;
-            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+            --font-heading: 'Outfit', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+            --radius-md: 8px;
+            --radius-lg: 16px;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: var(--font-body);
-            background-color: var(--color-bg);
-            color: var(--color-text);
-            line-height: 1.6;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: var(--font-body); background-color: var(--color-bg); color: var(--color-text); line-height: 1.6; }
 
         header {
             background-color: rgba(255, 255, 255, 0.85);
@@ -55,264 +48,75 @@
             align-items: center;
             box-shadow: var(--shadow-sm);
         }
+        .logo { font-family: var(--font-heading); font-size: 1.5rem; font-weight: 800; text-decoration: none; color: var(--color-primary); letter-spacing: -0.025em; }
+        .logo span { color: #0f172a; }
+        .nav-grid { display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; }
+        .nav-btn { color: var(--color-text-muted); text-decoration: none; font-weight: 600; font-size: 0.875rem; padding: 0.5rem 0.85rem; border-radius: var(--radius-md); transition: all 0.2s; }
+        .nav-btn:hover { color: var(--color-primary); background-color: #f1f5f9; }
+        .nav-btn-highlight { background-color: var(--color-primary); color: white !important; box-shadow: 0 4px 8px rgba(5, 150, 105, 0.2); }
+        .nav-btn-highlight:hover { background-color: var(--color-primary-hover); }
 
-        .logo {
-            font-family: var(--font-heading);
-            font-size: 1.5rem;
-            font-weight: 800;
-            text-decoration: none;
-            color: var(--color-primary);
-            letter-spacing: -0.025em;
-        }
-
-        .logo span {
-            color: #0f172a;
-        }
-
-        .nav-grid {
-            display: flex;
-            align-items: center;
-            gap: 1.25rem;
-            flex-wrap: wrap;
-        }
-
-        .nav-btn {
-            color: var(--color-text-muted);
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 0.875rem;
-            padding: 0.5rem 0.85rem;
-            border-radius: var(--radius-md);
-            transition: all 0.2s;
-        }
-
-        .nav-btn:hover {
-            color: var(--color-primary);
-            background-color: #f1f5f9;
-        }
-
-        .nav-btn-highlight {
-            background-color: var(--color-primary);
-            color: white !important;
-            box-shadow: 0 4px 8px rgba(5, 150, 105, 0.2);
-        }
-
-        .nav-btn-highlight:hover {
-            background-color: var(--color-primary-hover);
-        }
-
-        /* Hero */
         .hero {
-            background: linear-gradient(135deg, rgba(240, 253, 244, 0.92) 0%, rgba(224, 242, 254, 0.88) 100%),
-                url('logomilk.avif') center/cover;
+            background: linear-gradient(135deg, rgba(240, 253, 244, 0.92) 0%, rgba(224, 242, 254, 0.88) 100%), url('logomilk.avif') center/cover;
             padding: 7rem 2rem;
             text-align: center;
             border-bottom: 1px solid var(--color-border);
         }
-
-        .hero-container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .hero h1 {
-            font-family: var(--font-heading);
-            font-size: 3.5rem;
-            font-weight: 800;
-            color: #0f172a;
-            line-height: 1.15;
-            letter-spacing: -0.03em;
-            margin-bottom: 1.5rem;
-        }
-
-        .hero h1 mark {
-            background: none;
-            color: var(--color-primary);
-        }
-
-        .hero p {
-            font-size: 1.15rem;
-            color: var(--color-text-muted);
-            margin-bottom: 2.5rem;
-            max-width: 650px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .hero-action-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
+        .hero-container { max-width: 800px; margin: 0 auto; }
+        .hero h1 { font-family: var(--font-heading); font-size: 3.5rem; font-weight: 800; color: #0f172a; line-height: 1.15; letter-spacing: -0.03em; margin-bottom: 1.5rem; }
+        .hero h1 mark { background: none; color: var(--color-primary); }
+        .hero p { font-size: 1.15rem; color: #475569; margin-bottom: 2.5rem; max-width: 600px; margin-left: auto; margin-right: auto; }
+        .hero-action-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
 
         .btn-large {
-            padding: 0.85rem 1.75rem;
-            border-radius: var(--radius-md);
-            text-decoration: none;
-            font-weight: 700;
-            font-size: 1rem;
-            transition: all 0.2s;
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
-            box-shadow: var(--shadow-sm);
-        }
-
-        .btn-green {
-            background-color: var(--color-primary);
-            color: white;
-            box-shadow: 0 6px 15px rgba(5, 150, 105, 0.25);
-        }
-
-        .btn-green:hover {
-            background-color: var(--color-primary-hover);
-            transform: translateY(-2px);
-        }
-
-        .btn-sky {
-            background-color: var(--color-secondary);
-            color: white;
-            box-shadow: 0 6px 15px rgba(2, 132, 199, 0.25);
-        }
-
-        .btn-sky:hover {
-            background-color: #0270a5;
-            transform: translateY(-2px);
-        }
-
-        .btn-white {
-            background-color: white;
-            color: var(--color-text);
-            border: 1px solid var(--color-border);
-        }
-
-        .btn-white:hover {
-            background-color: var(--color-bg);
-            transform: translateY(-2px);
-        }
-
-        /* Container Section */
-        .main-section {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 5rem 2rem;
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 2.5rem;
-            margin-top: 3rem;
-        }
-
-        .card {
-            background: var(--color-surface);
+            justify-content: center;
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
             border-radius: var(--radius-lg);
-            border: 1px solid var(--color-border);
-            padding: 2.25rem;
-            box-shadow: var(--shadow-md);
-            transition: all 0.25s ease;
+            text-decoration: none;
+            transition: all 0.2s;
+            border: 2px solid transparent;
         }
+        .btn-green { background-color: var(--color-primary); color: white; box-shadow: 0 10px 15px -3px rgba(5, 150, 105, 0.25); }
+        .btn-green:hover { background-color: var(--color-primary-hover); transform: translateY(-2px); box-shadow: 0 15px 25px -5px rgba(5, 150, 105, 0.3); }
+        .btn-white { background-color: white; color: #0f172a; border-color: #cbd5e1; box-shadow: var(--shadow-sm); }
+        .btn-white:hover { background-color: #f8fafc; border-color: #94a3b8; transform: translateY(-2px); box-shadow: var(--shadow-md); }
 
-        .card:hover {
-            transform: translateY(-3px);
-            box-shadow: var(--shadow-lg);
-            border-color: rgba(5, 150, 105, 0.2);
-        }
+        .main-section { max-width: 1200px; margin: 0 auto; padding: 5rem 2rem; }
+        .section-header { text-align: center; margin-bottom: 3.5rem; }
+        .section-header h2 { font-family: var(--font-heading); font-size: 2.5rem; font-weight: 700; color: #0f172a; margin-bottom: 1rem; }
+        .section-header p { font-size: 1.1rem; color: var(--color-text-muted); max-width: 600px; margin: 0 auto; }
 
-        .card-title {
-            font-family: var(--font-heading);
-            font-size: 1.35rem;
-            font-weight: 700;
-            margin-bottom: 0.75rem;
-            color: #0f172a;
-        }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem; }
+        .card { background: var(--color-card); border-radius: var(--radius-lg); padding: 2.5rem; border: 1px solid var(--color-border); box-shadow: var(--shadow-sm); transition: all 0.3s ease; text-align: center; display: flex; flex-direction: column; align-items: center; }
+        .card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); border-color: #cbd5e1; }
+        .card-title { font-family: var(--font-heading); font-size: 1.5rem; font-weight: 700; color: #0f172a; margin-bottom: 1rem; }
+        .card p { color: var(--color-text-muted); margin-bottom: 2rem; flex-grow: 1; }
 
-        .card p {
-            color: var(--color-text-muted);
-            font-size: 0.95rem;
-            line-height: 1.6;
-            margin-bottom: 1.5rem;
-        }
+        /* Ads Grid */
+        .ad-card { background: white; border: 1px solid var(--color-border); border-radius: var(--radius-lg); overflow: hidden; display: flex; flex-direction: column; transition: transform 0.2s, box-shadow 0.2s; box-shadow: var(--shadow-sm); }
+        .ad-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+        .ad-card-img-wrapper { width: 100%; height: 200px; overflow: hidden; background: #f1f5f9; display: flex; align-items: center; justify-content: center; }
+        .ad-card-img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+        .ad-card-body { padding: 1.5rem; display: flex; flex-direction: column; flex-grow: 1; }
+        .ad-card-title { font-family: var(--font-heading); font-size: 1.25rem; font-weight: 700; color: #0f172a; margin-bottom: 0.5rem; }
+        .ad-card-meta { display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: var(--color-text-muted); margin-bottom: 1rem; }
+        .ad-card-desc { color: #475569; font-size: 0.95rem; line-height: 1.5; flex-grow: 1; }
 
-        .section-header {
-            text-align: center;
-        }
-
-        .section-header h2 {
-            font-family: var(--font-heading);
-            font-size: 2.25rem;
-            font-weight: 800;
-            color: #0f172a;
-        }
-
-        .section-header p {
-            color: var(--color-text-muted);
-            margin-top: 0.5rem;
-        }
-
-        footer {
-            background: #0f172a;
-            color: #94a3b8;
-            text-align: center;
-            padding: 3rem 2rem;
-            border-top: 1px solid #1e293b;
-        }
+        footer { background: white; border-top: 1px solid var(--color-border); padding: 2rem; text-align: center; color: var(--color-text-muted); font-size: 0.9rem; margin-top: 4rem; }
     </style>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            var isFile = window.location.protocol === 'file:';
-            var isLiveServer = window.location.port !== '' && window.location.port !== '80' && window.location.port !== '443';
-
-            if (isFile || isLiveServer) {
-                var links = document.querySelectorAll("a");
-                links.forEach(function (link) {
-                    var href = link.getAttribute("href");
-                    if (href && href.indexOf(".php") !== -1) {
-                        var target = href;
-                        // For relative directory traversal, strip relative prefix
-                        if (href.startsWith("../")) {
-                            target = href.substring(3);
-                        }
-                        link.setAttribute("href", "http://localhost/milkproject/" + target);
-                    }
-                });
-            }
-        });
-    </script>
 </head>
-
 <body>
-
-    <!-- HEADER (9 Navigation Buttons total on this page) -->
+    <!-- HEADER -->
     <header>
-        <!-- Button 1: Logo Home -->
         <a href="index.html" class="logo">🥛 Reubentech<span>Hub</span></a>
 
-        <nav class="nav-grid">
-            <!-- Button 2: Public Notice Board -->
+        <nav class="nav-grid" id="nav-container">
             <a href="index.html" class="nav-btn">Public Board</a>
-
-            <!-- Button 3: Producer Dashboard -->
-            <a href="login.html" class="nav-btn">Producer Dashboard</a>
-
-            <!-- Button 4: Administrator Portal -->
-            <a href="login.html" class="nav-btn">Admin Portal</a>
-
-            <!-- Button 5: Setup Diagnostics -->
-            <a href="login.html" class="nav-btn">Setup Diagnostics</a>
-
-            <!-- Button 6: System Reports -->
-            <a href="login.html" class="nav-btn">Coop Reports</a>
-
-            <!-- Button 7: API Documentation -->
-            <a href="login.html" class="nav-btn">System APIs</a>
-
-            <!-- Button 8: Sign In -->
             <a href="login.html" class="nav-btn">Sign In</a>
-
-            <!-- Button 9: Sign Up -->
             <a href="register.html" class="nav-btn nav-btn-highlight">Register</a>
         </nav>
     </header>
@@ -323,16 +127,14 @@
             <h1>Farm-Fresh Dairy cooperative <mark>Digital Marketplace</mark></h1>
             <p>Welcome to the cooperative network dashboard. Access real-time milk postings, sell supply directly to
                 processing plants, publish advertisements, and review financial ledger invoices.</p>
-            <div class="hero-action-buttons">
-                <!-- Button 10: Sign In (Hero Secondary Action) -->
+            <div class="hero-action-buttons" id="hero-actions">
                 <a href="login.html" class="btn-large btn-green">Access Dashboard Portal</a>
-                <!-- Button 11: Register (Hero Primary Action) -->
                 <a href="register.html" class="btn-large btn-white">Create Producer Account</a>
             </div>
         </div>
     </section>
 
-    <!-- CONTENT -->
+    <!-- WORKSPACES CONTENT -->
     <main class="main-section">
         <div class="section-header">
             <h2>Digital Cooperative Workspaces</h2>
@@ -345,8 +147,7 @@
                 <h3 class="card-title">🥛 Milk Marketplace</h3>
                 <p>Register as a member to list cow, goat, or camel milk liters, asking price rates, and publish
                     directly to local processors.</p>
-                <a href="login.html" class="btn-large btn-white"
-                    style="font-size:0.85rem; padding:0.5rem 1rem;">Post Supply</a>
+                <a href="member/dashboard.html?tab=post_supply" id="btn-post-supply" class="btn-large btn-white" style="font-size:0.85rem; padding:0.5rem 1rem;">Post Supply</a>
             </div>
 
             <!-- Card 2 -->
@@ -354,8 +155,7 @@
                 <h3 class="card-title">🏢 Commercial Buyers</h3>
                 <p>Processors like Brookside Plant, New KCC Cooperative, and Githunguri Dairy purchase fresh stock daily
                     from registered producers.</p>
-                <a href="login.html" class="btn-large btn-white"
-                    style="font-size:0.85rem; padding:0.5rem 1rem;">Explore Buyers</a>
+                <a href="member/dashboard.html?tab=markets" id="btn-explore-buyers" class="btn-large btn-white" style="font-size:0.85rem; padding:0.5rem 1rem;">Explore Buyers</a>
             </div>
 
             <!-- Card 3 -->
@@ -363,16 +163,117 @@
                 <h3 class="card-title">📈 Cooperative Reports</h3>
                 <p>Review gross transaction volumes, estimated commission ledger reports, sales analytics, and download
                     SQL ledger backups.</p>
-                <a href="login.html" class="btn-large btn-white"
-                    style="font-size:0.85rem; padding:0.5rem 1rem;">View Reports</a>
+                <a href="member/dashboard.html?tab=transactions" id="btn-view-reports" class="btn-large btn-white" style="font-size:0.85rem; padding:0.5rem 1rem;">View Reports</a>
+            </div>
+        </div>
+    </main>
+
+    <!-- NOTICES & ADVERTISEMENTS SECTION -->
+    <main class="main-section" style="padding-top: 2rem;">
+        <div class="section-header">
+            <h2>Community Notices & Advertisements</h2>
+            <p>Explore open notices, equipment listings, and announcements posted by members of our cooperative.</p>
+        </div>
+
+        <div class="grid" id="ads-grid">
+            <div style="grid-column: 1 / -1; text-align:center; color:#64748b; padding: 5rem 2rem;">
+                <p>Loading advertisements...</p>
             </div>
         </div>
     </main>
 
     <footer>
-        <p>&copy; 2026 Reubentech Hub — Dairy Cooperative System. All rights reserved.</p>
+        <p>&copy; <script>document.write(new Date().getFullYear())</script> Reubentech Hub — Dairy Cooperative System. All rights reserved.</p>
     </footer>
 
+    <script>
+        document.addEventListener("DOMContentLoaded", async function() {
+            // Update UI based on auth status
+            const currentUser = await Auth.getCurrentUser();
+            
+            const navContainer = document.getElementById('nav-container');
+            const heroActions = document.getElementById('hero-actions');
+            
+            if (currentUser) {
+                const isAdmin = currentUser.profile.role === 'admin';
+                
+                // Update Nav
+                if (isAdmin) {
+                    navContainer.innerHTML = `
+                        <a href="index.html" class="nav-btn">Public Board</a>
+                        <a href="admin/homepage.html" class="nav-btn">Admin Portal</a>
+                        <a href="logout.html" class="nav-btn nav-btn-highlight">Logout (${currentUser.profile.username})</a>
+                    `;
+                    
+                    heroActions.innerHTML = `
+                        <a href="admin/homepage.html" class="btn-large btn-green">Access Admin Portal</a>
+                        <a href="logout.html" class="btn-large btn-white">Sign Out</a>
+                    `;
+                    
+                    document.getElementById('btn-view-reports').href = 'admin/reports.html';
+                } else {
+                    navContainer.innerHTML = `
+                        <a href="index.html" class="nav-btn">Public Board</a>
+                        <a href="member/dashboard.html" class="nav-btn">Producer Dashboard</a>
+                        <a href="logout.html" class="nav-btn nav-btn-highlight">Logout (${currentUser.profile.username})</a>
+                    `;
+                    
+                    heroActions.innerHTML = `
+                        <a href="member/dashboard.html" class="btn-large btn-green">Go to Dashboard Portal</a>
+                        <a href="logout.html" class="btn-large btn-white">Sign Out</a>
+                    `;
+                }
+            } else {
+                // If not logged in, update links to point to login page
+                document.getElementById('btn-post-supply').href = 'login.html';
+                document.getElementById('btn-explore-buyers').href = 'login.html';
+                document.getElementById('btn-view-reports').href = 'login.html';
+            }
+            
+            // Load Advertisements
+            const adsGrid = document.getElementById('ads-grid');
+            const { data: ads, error } = await Database.fetchRecentAds(6);
+            
+            if (error || !ads || ads.length === 0) {
+                adsGrid.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align:center; color:#64748b; padding: 5rem 2rem; background: white; border: 1px dashed #cbd5e1; border-radius: 16px;">
+                        <span style="font-size: 2.5rem; display:block; margin-bottom:1rem;">📢</span>
+                        <p style="font-weight: 600; color: #334155; margin-bottom: 0.25rem;">No advertisements have been posted yet</p>
+                        <p style="font-size: 0.9rem; color: #64748b;">Join the cooperative and publish your first listing to get noticed!</p>
+                    </div>
+                `;
+            } else {
+                let html = '';
+                ads.forEach(ad => {
+                    const date = new Date(ad.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                    
+                    let imgHtml = '';
+                    if (ad.image_url) {
+                        imgHtml = `<img src="${ad.image_url}" alt="Advert">`;
+                    } else {
+                        imgHtml = `<div style="width:100%; height:100%; background:#f1f5f9; display:flex; align-items:center; justify-content:center; color:#94a3b8; font-weight: 500; font-size: 0.9rem;">🖼️ No Image Provided</div>`;
+                    }
+                    
+                    html += `
+                        <div class="ad-card">
+                            <div class="ad-card-img-wrapper">
+                                ${imgHtml}
+                            </div>
+                            <div class="ad-card-body">
+                                <h3 class="ad-card-title">${ad.title}</h3>
+                                <div class="ad-card-meta">
+                                    <span>👤 Posted by <strong>${ad.users.username}</strong></span>
+                                    <span>•</span>
+                                    <span>📅 ${date}</span>
+                                </div>
+                                <p class="ad-card-desc">${ad.description.replace(/\n/g, '<br>')}</p>
+                            </div>
+                        </div>
+                    `;
+                });
+                adsGrid.innerHTML = html;
+            }
+        });
+    </script>
 </body>
-
 </html>

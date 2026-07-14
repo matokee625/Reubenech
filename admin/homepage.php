@@ -125,6 +125,10 @@ adminHeader('homepage', '');
         <span class="qa-icon">📈</span>
         <span class="qa-label">Reports</span>
     </a>
+    <a href="advertisements.php" class="quick-action-card">
+        <span class="qa-icon">📢</span>
+        <span class="qa-label">Advertisements</span>
+    </a>
     <a href="notifications.php" class="quick-action-card">
         <span class="qa-icon">🔔</span>
         <span class="qa-label">Notifications</span>

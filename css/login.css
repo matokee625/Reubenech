@@ -159,6 +159,14 @@ body {
     margin-bottom: 2rem;
     font-size: 0.85rem;
     color: rgba(255, 255, 255, 0.85);
+    /* Admin login label colour */
+    .admin-login {
+        color: #ffcc00; /* gold accent */
+        font-weight: 600;
+    }
+    .admin-login input {
+        accent-color: #ffcc00;
+    }
 }
 
 .remember-me {

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Logging Out...</title>
+    <!-- Load Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-config.js"></script>
+    <script src="js/auth.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #6b11cb 100%);
+            color: white;
+        }
+        .message {
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(16px);
+            padding: 2rem 3rem;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+    </style>
+</head>
+<body>
+    <div class="message">
+        <h2>Signing out...</h2>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            Auth.logout();
+        });
+    </script>
+</body>
+</html>

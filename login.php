@@ -49,16 +49,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $log_stmt = $conn->prepare("INSERT INTO access_logs (user_id, username, action, ip_address, user_agent) VALUES (?, ?, 'login', ?, ?)");
                     $log_stmt->execute([$user->id, $user->username, $ip_address, $user_agent]);
 
-                    // Trigger SMS alert on successful login to configured phone
-                    require_once 'includes/sms.php';
-                    sendSMSAlert("Security Notice: User '{$user->username}' (Role: {$user->role}) logged in successfully from IP: {$ip_address}.");
-
-                    if ($user->role === 'admin') {
-                        header("Location: admin/homepage.php");
+                    // Admin flag check
+                    $adminRequested = isset($_POST['admin']);
+                    if ($adminRequested && $user->role !== 'admin') {
+                        $error = "You do not have admin privileges.";
+                        unset($_SESSION['user_id'], $_SESSION['username'], $_SESSION['user_role']);
                     } else {
-                        header("Location: member/dashboard.php");
+                        // Trigger SMS alert on successful login
+                        try {
+                            require_once 'includes/sms.php';
+                            sendSMSAlert("Security Notice: User '{$user->username}' (Role: {$user->role}) logged in successfully from IP: {$ip_address}.");
+                        } catch (Exception $smsEx) {
+                            // SMS failure should not block login
+                        }
+
+                        // Redirect based on role
+                        if ($user->role === 'admin') {
+                            header("Location: admin/homepage.php");
+                        } else {
+                            header("Location: member/dashboard.php");
+                        }
+                        exit();
                     }
-                    exit();
                 }
             } else {
                 $error = "Invalid username/email or password.";

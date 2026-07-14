@@ -46,7 +46,7 @@
             let html = `<table><thead><tr><th>Email</th><th>Status</th><th>Action</th></tr></thead><tbody>`;
             users.forEach(u=>{
                 const pending = u.role === 'pending' || u.is_pending;
-                html+=`<tr data-id="${u.id}"><td>${u.email||'—'}</td><td>${pending?'Pending':'Active'}</td><td>${pending?'<button class="approve-btn">Approve</button>':''}</td></tr>`;
+                html+=`<tr data-id="${u.id}"><td>${u.email||'—'}</td><td>${pending?'Pending':'Active'}</td><td>${pending?'<button class="approve-btn">Approve</button>':''}<button class="delete-btn">Delete</button><button class="restore-btn">Restore</button></td></tr>`;
             });
             html+='</tbody></table>';
             document.getElementById('users-container').innerHTML = html;
